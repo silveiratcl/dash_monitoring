@@ -6,8 +6,8 @@ library(sf)
 
 
 # Import shapefiles data
-dafor_shp <- st_read("c//../shp/dafor.shp")
-geo_shp <-st_read("c//../shp/geomorfologia.shp")
+dafor_shp <- st_read("shp/dafor.shp")
+geo_shp <-st_read("shp/geomorfologia.shp")
 
 
 # Define UI
@@ -30,13 +30,13 @@ ui <- bootstrapPage(
                  #choices = c("Dafor" = dafor_shp, "Geomorfologia" = geo_shp$localidade ))
               
                 #3 
-               checkboxInput(inputId = "dafor_shp", #needs work
-                             label = strong("DAFOR - Coral Sol"),
-                             value = FALSE),
+             #  checkboxInput(inputId = "dafor_shp", #needs work
+              #               label = strong("DAFOR - Coral Sol"),
+               #              value = FALSE),
                
-               checkboxInput(inputId = "geo_shp", #needs work
-                             label = strong("Geomorfologia"),
-                             value = FALSE)
+              # checkboxInput(inputId = "geo_shp", #needs work
+               #              label = strong("Geomorfologia"),
+                #             value = FALSE)
             
           )
 )
