@@ -55,7 +55,8 @@ server <- function(input, output, session) {
     # Filter shapefiles data based on selected date range
     filtered_dafor <-  dafor_shp[dafor_shp$data >= input$data[1] & dafor_shp$data <= input$data[2], ]
     filtered_geo <- geo_shp[geo_shp$data >= input$data[1] & geo_shp$data <= input$data[2], ]
-
+  
+    
     
     # Return filtered shapefiles data
     list(filtered_dafor = filtered_dafor, 
