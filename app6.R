@@ -1,73 +1,82 @@
 library(shiny)
+library(shinydashboard)
 library(leaflet)
 library(rgdal)
-library(sp)
+library(maptools)
+library(htmlwidgets)
 library(sf)
+library(sp)
+library(tmap)
+library(dplyr)
 
-# Import shapefile data
-shapefile1 <- st_read("shp/dafor.shp")
-shapefile2 <- st_read("shp/geomorfologia.shp")
+shp1 <- st_read("shp/dafor.shp") %>%
+  mutate(data = as.Date(data))
 
-# Define UI
-ui <- fluidPage(
-  dateRangeInput("dateRange", label = "Select date range:"),
-  checkboxGroupInput("shapefiles", label = "Select shapefiles:",
-                     choices = c("Shapefile 1", "Shapefile 2"),
-                     selected = c("shapefile1", "shapefile2")),
-  leafletOutput("map")
+shp2 <- st_read("shp/geomorfologia.shp") %>%
+  mutate(data = as.Date(data))
+
+
+#Create the UI
+ui <- dashboardPage(
+  dashboardHeader(title = "Sun Coral Monitoring"),
+  dashboardSidebar(
+    dateRangeInput("data", "Selecione intervalo de data: ", 
+                   format = "yyyy-mm-dd",
+                   start = "2022-06-15",
+                   end =  "2023-12-31",
+                   separator = " até "),
+    
+    
+    
+    
+    checkboxGroupInput("layer", label = h4("Layer"), choices = c("Shapefile 1", "Shapefile 2"),  selected = "Shapefile 1" )
+  ),
+  dashboardBody(
+    fluidRow(
+      leafletOutput("map", width = "100%", height = "100%")
+    )
+  )
 )
 
-# Define Server
+#Create the Server
 server <- function(input, output) {
   
-  # Define reactive data
-  reactiveData <- eventReactive(input$dateRange, {
-    data_filt <- NULL
-    # Filter data based on selected date range and shapefiles
-    if ("Shapefile 1" %in% input$shapefiles) {
-      shapefile1_filt <- shapefile1[shapefile1$data >= input$dateRange[1] &
-                                      shapefile1$data <= input$dateRange[2], ]
-      data_filt <- shapefile1_filt
-    }
-    
-    if ("Shapefile 2" %in% input$shapefiles) {
-      shapefile2_filt <- shapefile2[shapefile2$data >= input$dateRange[1] &
-                                      shapefile2$data <= input$dateRange[2], ]
-      if (is.null(data_filt)) {
-        data_filt <- shapefile2_filt
-      } else {
-        data_filt <- rbind(data_filt, shapefile2_filt)
-      }
-    }
-    
-    # If no shapefiles selected, return NULL
-    if (is.null(data_filt)) {
-      return(NULL)
-    }
-    
-    # Cast data into a "MULTILINESTRING" class
-    data_filt <- st_cast(data_filt, "MULTILINESTRING", group_or_split = TRUE)
-    
-    # Return filtered and cast data
-    return(data_filt)
-    
+  shp1_filtered <- reactive({
+    shp1 %>%
+      filter(data == as.Date(input$data, "%Y-%m-%d"))
+      
+  })
   
-  # Update map based on selected data and shapefile layers
-    # If no data to display, return empty map
-    if (is.null(data)) {
-      return(leaflet() %>% addTiles())
+  shp2_filtered <- reactive({
+    shp2 %>%
+      filter(data == as.Date(input$data, "%Y-%m-%d" ))
+     
+  })
+  
+  output$map <- renderLeaflet({
+    m <- leaflet() %>%
+      setView(-48.38, -27.28, zoom = 10) %>% 
+      addProviderTiles("CartoDB.Positron")
+    
+    if ("Shapefile 1" %in% input$layer) {
+      map_shp1 <- tm_shape(shp1_filtered()) +
+        tm_borders(col = "red", lwd = 0.5) 
+     
+      m <- addPolylines(m, data = shp1_filtered())
+     
     }
     
-    # Otherwise, display data on map
-    leaflet() %>%
-      addTiles() %>%
-      addPolylines(data = data,
-                   fillColor = "#FF0000",
-                   fillOpacity = 0.5,
-                   color = "#000000",
-                   weight = 1)
+    if ("Shapefile 2" %in% input$layer) {
+      map_shp2 <- tm_shape(shp2_filtered()) +
+        tm_borders(col = "blue", lwd = 0.5) 
+     
+      m <- addPolylines(m, data = shp2_filtered())
+
+      
+     
+    }
   })
 }
 
-# Run the app
-shinyApp(ui = ui, server = server)
+#Run the shiny app
+shinyApp(ui, server)

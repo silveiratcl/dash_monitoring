@@ -22,7 +22,7 @@ ui <- bootstrapPage(
                                separator = " até "),
                 
                 # 1 # 
-                #checkboxGroupInput("input$data", label = "Select shapefile:", choices = c("Dafor", "Geomorfologia"))      
+                checkboxGroupInput("data", label = "Select shapefile:", choices = c("Dafor", "Geomorfologia"))      
                
                # 2 #
                 #checkboxGroupInput(
@@ -61,6 +61,10 @@ server <- function(input, output, session) {
     # Return filtered shapefiles data
     list(filtered_dafor = filtered_dafor, 
          filtered_geo = filtered_geo) ### needs work
+    
+
+    
+    
   })  
   
  #https://shiny.rstudio.com/articles/basics.html
@@ -76,7 +80,7 @@ server <- function(input, output, session) {
                   fillColor = "#FF0000",
                   fillOpacity = 0.5,
                   color = "#FF0000",
-                  weight = 6,
+                  weight = 8,
                   popup = ~paste0("<strong>Localidade: </strong> ", localidade, "<br>",
                                   "<strong>Data:</strong> ", data, "<br>",
                                   "<strong>N. Mergulhadores: </strong> ", n_divers, "<br>", 
@@ -88,7 +92,7 @@ server <- function(input, output, session) {
                   fillColor = "#0000FF",
                   fillOpacity = 0.5,
                   color = "#0000FF",
-                  weight = 6,
+                  weight = 8,
                   popup = ~paste0("<strong>Localidade:</strong> ", localidade, "<br>",
                                   "<strong>Data:</strong> ", data, "<br>",
                                   "<strong>IAH:</strong> ", iah_seg, "<br>",
