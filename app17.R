@@ -118,7 +118,7 @@ server <- function(input, output) {
         )
     } else {
       leafletProxy("map", data = reactiveData()$filtered_dafor) %>% 
-        clearShapes() 
+        clearShapes()
     }
     
   }
