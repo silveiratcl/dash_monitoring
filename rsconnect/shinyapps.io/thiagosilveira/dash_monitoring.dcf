@@ -1,0 +1,11 @@
+name: dash_monitoring
+title:
+username:
+account: thiagosilveira
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 8757822
+bundleId: 7045606
+url: https://thiagosilveira.shinyapps.io/dash_monitoring/
+when: 1680575256.31826
+lastSyncTime: 1680575256.31827

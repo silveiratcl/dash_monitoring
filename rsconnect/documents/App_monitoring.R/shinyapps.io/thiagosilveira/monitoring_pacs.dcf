@@ -1,0 +1,14 @@
+name: monitoring_pacs
+title: monitoring_pacs
+username:
+account: thiagosilveira
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 8760931
+bundleId: 7054268
+url: https://thiagosilveira.shinyapps.io/monitoring_pacs/
+when: 1680724214.50182
+lastSyncTime: 1680724214.50183
+asMultiple: FALSE
+asStatic: FALSE
+ignoredFiles: app.R|App2.R|App3.R|app4.R|app5.R|app6.R|sun_coral_monitoring.R
