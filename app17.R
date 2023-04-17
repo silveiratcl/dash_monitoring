@@ -37,30 +37,6 @@ ui <- bootstrapPage(
   )
 )
 
-###
-#ui <- dashboardPage(
- # dashboardHeader(title = "Sun Coral Monitoring"),
-  #dashboardSidebar(
-   # dateRangeInput("daterange", "Selecione intervalo de data: ", 
-    #               format = "yyyy-mm-dd",
-     #              start = "2022-06-15",
-      #             end =  "2023-12-31",
-       #            separator = " até "),
-    
-    
-    
-    
-    #checkboxGroupInput("layers", label = h4("Layers"), choices = c("Dafor Sun Coral", "Geomorfologia"),  selected = "Dafor Sun Coral" )
-  #),
-  #dashboardBody(
-   # fluidRow(
-    #  leafletOutput("map", width = "100%", height = "100%")
-    #)
-#  )
-#)
-
-###
-
 
 
 # Define Server
@@ -102,8 +78,8 @@ server <- function(input, output) {
   output$map <- renderLeaflet({
     leaflet() %>%
       addTiles() %>%
-      setView(-48.38, -27.28, zoom = 10) %>% 
-      addProviderTiles("CartoDB.Positron")
+      setView(-48.38, -27.28, zoom = 10) #%>% 
+      #addProviderTiles("CartoDB.Positron")
   })
   
   observe({
