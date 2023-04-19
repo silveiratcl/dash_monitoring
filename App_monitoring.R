@@ -1,13 +1,8 @@
 library(shiny)
-library(shinydashboard)
 library(leaflet)
 library(rgdal)
-library(maptools)
-library(htmlwidgets)
-library(sf)
 library(sp)
-library(tmap)
-library(dplyr)
+library(sf)
 
 
 # Import shapefiles data
@@ -33,7 +28,6 @@ ui <- bootstrapPage(
                                    selected = c("Dafor","Geomorphology")
                 )      
                 
-                
   )
 )
 
@@ -52,32 +46,33 @@ server <- function(input, output) {
     
     
     # Extract variables column and add to filtered_dafor
-    localidade_dafor <- dafor_shp$localidade
-    n_divers <- dafor_shp$n_divers
-    n_tr_pr <- dafor_shp$n_tr_pr
-    vis_horiz <- dafor_shp$vis_horiz 
-    comp_m_dafor <- dafor_shp$comp_m
+   # localidade_dafor <- dafor_shp$localidade
+    #n_divers <- dafor_shp$n_divers
+    #n_tr_pr <- dafor_shp$n_tr_pr
+    #vis_horiz <- dafor_shp$vis_horiz 
+    #comp_m_dafor <- dafor_shp$comp_m
     
     
     
     # Extract variables column and add to filtered_geo
-    localidade_geo <- geo_shp$localidade
-    iah_seg<- geo_shp$iah_seg
-    comp_m_geo <- geo_shp$comp_m
+    #localidade_geo <- geo_shp$localidade
+    #iah_seg<- geo_shp$iah_seg
+    #comp_m_geo <- geo_shp$comp_m
     
     
     
     # Return filtered shapefiles data
     list(filtered_dafor = filtered_dafor, 
-         filtered_geo = filtered_geo,
-         localidade_dafor = localidade_dafor,
-         localidade_geo = localidade_geo,
-         n_divers = n_divers,
-         n_tr_pr = n_tr_pr,
-         vis_horiz = vis_horiz,
-         iah_seg = iah_seg,
-         comp_m_dafor = comp_m_dafor,
-         comp_m_geo = comp_m_geo)
+         filtered_geo = filtered_geo#,
+         #localidade_dafor = localidade_dafor,
+         #localidade_geo = localidade_geo,
+         #n_divers = n_divers,
+         #n_tr_pr = n_tr_pr,
+         #vis_horiz = vis_horiz,
+         #iah_seg = iah_seg,
+         #comp_m_dafor = comp_m_dafor,
+         #comp_m_geo = comp_m_geo
+         )
   })  
   
   
@@ -104,12 +99,12 @@ server <- function(input, output) {
                      fillOpacity = 0.5,
                      color = "red",
                      weight = 8,
-                     popup = ~paste0("<strong>Locality: </strong> ", reactiveData()$localidade_dafor, "<br>",
+                     popup = ~paste0("<strong>Locality: </strong> ", reactiveData()$filtered_dafor$localidade, "<br>",
                                      "<strong>Date:</strong> ", data, "<br>",
-                                     "<strong>N. Divers: </strong> ", reactiveData()$n_divers, "<br>", 
-                                     "<strong>Horizontal Visibility(m): </strong> ", reactiveData()$vis_horiz, "<br>",
-                                     "<strong>N. Transects present: </strong> " , reactiveData()$n_tr_pr,"<br>",
-                                     "<strong>Distance(m): </strong> ", reactiveData()$comp_m_dafor),
+                                     "<strong>N. Divers: </strong> ", reactiveData()$filtered_dafor$n_divers, "<br>", 
+                                     "<strong>Horizontal Visibility(m): </strong> ", reactiveData()$filtered_dafor$vis_horiz, "<br>",
+                                     "<strong>N. Transects present: </strong> " , reactiveData()$filtered_dafor$n_tr_pr,"<br>",
+                                     "<strong>Distance(m): </strong> ", reactiveData()$filtered_dafor$comp_m),
                      labelOptions = labelOptions(noHide = F, direction = "rigth")
         )
     } else {
@@ -124,10 +119,10 @@ server <- function(input, output) {
                      fillOpacity = 0.5,
                      color = "blue",
                      weight = 8,
-                     popup = ~paste0("<strong>Locality: </strong> ", reactiveData()$localidade_geo, "<br>",
-                                     "<strong>Date:</strong> ", data, "<br>",
-                                     "<strong>Segment IAH: </strong> ", reactiveData()$iah_seg, "<br>", 
-                                     "<strong>Distancia(m): </strong> ", reactiveData()$comp_m_geo),
+                     popup = ~paste0("<strong>Locality: </strong> ", reactiveData()$filtered_geo$localidade, "<br>",
+                                     "<strong>Date:</strong> ", reactiveData()$filtered_geo$data, "<br>",
+                                     "<strong>Segment IAH: </strong> ", reactiveData()$filtered_geo$iah_seg, "<br>", 
+                                     "<strong>Distancia(m): </strong> ", reactiveData()$filtered_geo$comp_m),
                      labelOptions = labelOptions(noHide = F, direction = "rigth")
         )
     } else {
