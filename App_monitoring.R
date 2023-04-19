@@ -7,7 +7,16 @@ library(sf)
 
 # Import shapefiles data
 dafor_shp <- st_read("shp/dafor.shp")
-geo_shp <-st_read("shp/geomorfologia.shp")
+#st_crs(dafor_shp) <- 3857
+
+geo_shp <- st_read("shp/geomorfologia.shp")
+#st_crs(geo_shp) <- 3857
+
+
+#st_crs(geo_shp)
+
+
+# leafleat EPSG:3857
 
 
 # Define UI
@@ -34,7 +43,7 @@ ui <- bootstrapPage(
 
 
 # Define Server
-server <- function(input, output) {
+server <- function(input, output, session) {
   
   # Define reactive data
   reactiveData <- eventReactive(input$daterange, {
@@ -44,35 +53,9 @@ server <- function(input, output) {
     filtered_geo <- geo_shp[geo_shp$data >= input$daterange[1] & geo_shp$data <= input$daterange[2], ]
     
     
-    
-    # Extract variables column and add to filtered_dafor
-   # localidade_dafor <- dafor_shp$localidade
-    #n_divers <- dafor_shp$n_divers
-    #n_tr_pr <- dafor_shp$n_tr_pr
-    #vis_horiz <- dafor_shp$vis_horiz 
-    #comp_m_dafor <- dafor_shp$comp_m
-    
-    
-    
-    # Extract variables column and add to filtered_geo
-    #localidade_geo <- geo_shp$localidade
-    #iah_seg<- geo_shp$iah_seg
-    #comp_m_geo <- geo_shp$comp_m
-    
-    
-    
     # Return filtered shapefiles data
     list(filtered_dafor = filtered_dafor, 
-         filtered_geo = filtered_geo#,
-         #localidade_dafor = localidade_dafor,
-         #localidade_geo = localidade_geo,
-         #n_divers = n_divers,
-         #n_tr_pr = n_tr_pr,
-         #vis_horiz = vis_horiz,
-         #iah_seg = iah_seg,
-         #comp_m_dafor = comp_m_dafor,
-         #comp_m_geo = comp_m_geo
-         )
+         filtered_geo = filtered_geo)
   })  
   
   
@@ -88,12 +71,11 @@ server <- function(input, output) {
         labels = c("Dafor", "Geomorphology"),
         title = "Legend"
       )
-    #addProviderTiles("CartoDB.Positron")
   })
   
   observe({
     # Show/hide layers based on check box input
-    if ("Dafor" %in% input$layers) {
+    if ("Dafor" %in% input$layers && nrow(reactiveData()$filtered_dafor) > 0) {
       leafletProxy("map", data = reactiveData()$filtered_dafor) %>%
         addPolylines(fillColor = "red",
                      fillOpacity = 0.5,
@@ -113,7 +95,7 @@ server <- function(input, output) {
     }
     
     
-    if("Geomorphology" %in% input$layers) {
+    if("Geomorphology" %in% input$layers && nrow(reactiveData()$filtered_geo) > 0) {
       leafletProxy("map", data = reactiveData()$filtered_geo) %>%
         addPolylines(fillColor = "blue",
                      fillOpacity = 0.5,
@@ -126,7 +108,7 @@ server <- function(input, output) {
                      labelOptions = labelOptions(noHide = F, direction = "rigth")
         )
     } else {
-      leafletProxy("map", data = reactiveData()$filtered_dafor) %>% 
+      leafletProxy("map", data = reactiveData()$filtered_geo) %>% 
         clearShapes()
     }
     
