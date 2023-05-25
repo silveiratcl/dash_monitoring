@@ -5,23 +5,11 @@ library(sp)
 library(sf)
 
 # Import shapefiles data
-dafor_shp <- st_read("shp/dafor.shp", crs = 3857)
-dafor_shp <- st_transform(dafor_shp, crs = 3857)
-
-geo_shp <- st_read("shp/geomorfologia.shp", crs = 3857)
-geo_shp <- st_transform(geo_shp, crs = 3857)
-
-
-#st_crs(geo_shp)
-
-
-# leafleat EPSG:3857
 dafor_shp <- st_read("shp/dafor.shp")
 st_crs(dafor_shp) <- 3857
 
 geo_shp <- st_read("shp/geomorfologia.shp")
 st_crs(geo_shp) <- 3857
-
 
 pacs_shp <- st_read("shp/pontos_pacs.shp")
 st_crs(pacs_shp) <- 3857
@@ -135,5 +123,3 @@ server <- function(input, output, session) {
 
 # Run the app
 shinyApp(ui = ui, server = server)
-
-
