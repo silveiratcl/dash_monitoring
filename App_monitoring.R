@@ -1,37 +1,43 @@
 library(shiny)
+library(shinydashboard)
+library(htmlwidgets)
 library(leaflet)
 library(rgdal)
 library(sp)
 library(sf)
+library(dplyr)
+
 
 # Import shapefiles data
 dafor_shp <- st_read("shp/dafor.shp")
-#dafor_crs <- st_crs(3857)
+#dafor_crs <- st_crs("EPSG:3857")
 #dafor_shp <- st_transform(dafor_shp, dafor_crs)
-#print(dafor_shp)
+print(dafor_shp)
 
 geo_shp <- st_read("shp/geomorfologia.shp")
-#geo_crs <- st_crs(3857)
+#geo_crs <- st_crs("EPSG:3857")
 #geo_shp <- st_transform(geo_shp, geo_crs)
 #print(geo_shp)
 
 pacs_shp <- st_read("shp/pts_pacs.shp")
-#pacs_crs <- st_crs(3857)
+#pacs_crs <- st_crs("EPSG:3857")
 #pacs_shp <- st_transform(pacs_shp, pacs_crs)
 #print(pacs_shp)
 
 local_shp <- st_read("shp/localidade.shp")
-#local_crs <- st_crs(3857)
+#local_crs <- st_crs("EPSG:3857")
 #local_shp <- st_transform(local_shp, local_crs)
 #print(local_shp)
 
 
-# Define UI
-ui <- bootstrapPage(
-  tags$style(type = "text/css", "html, body {width:100%;height:100%}"),
-  leafletOutput("map", width = "100%", height = "100%"),
-  absolutePanel(
-    top = 10, right = 10,
+
+ui <- dashboardPage(
+  
+  skin = "yellow",
+  
+  dashboardHeader(title = "Sun Coral Monitoring"),
+  
+  dashboardSidebar(
     dateRangeInput(
       "daterange", "Select date range: ",
       format = "yyyy-mm-dd",
@@ -39,17 +45,35 @@ ui <- bootstrapPage(
       end = "2023-12-31",
       separator = " to "
     ),
+    
     checkboxGroupInput(
       "layers",
       label = "Select layer:",
       choices = c("Dafor", "Geomorphology", "Target Locations", "Locality"),
       selected = c("Dafor")
+    )),
+  
+  dashboardBody(
+    tags$style(type = "text/css", "#map {height: calc(100vh - 80px) !important;}"),
+    
+    fluidRow(
+      infoBoxOutput("locations_Box", width = 3),
+      infoBoxOutput("segments_Box", width = 3),
+      infoBoxOutput("sun_coral_Box", width = 3),
+      infoBoxOutput("dive_time_box", width = 3),
+      height = "300px"
+    ),
+    
+    fluidRow(
+      box(leafletOutput("map"),
+          width = "100%",
+          height = "100%"
+      )
     )
   )
 )
 
-# Define Server
-server <- function(input, output, session) {
+server <- function(input, output, session) { 
   
   # Define reactive data
   reactiveData <- reactive({
@@ -59,27 +83,90 @@ server <- function(input, output, session) {
     filtered_pacs <- pacs_shp
     filtered_local <- local_shp
     
+    #boxesdata
+    
+    #location number
+    n_location <- dafor_shp %>% 
+      count(localidade) %>% 
+      nrow() 
+    
+    #segments number
+    n_segments <- dafor_shp %>% 
+      count(dafor_id) %>% 
+      nrow() 
+    
+    #sum coral prevalence
+    sum_cs_present <- dafor_shp %>% 
+      summarise(sum(n_tr_pr)) 
+    
+    n_cs_present <- sum_cs_present$`sum(n_tr_pr)` 
+    
+    #dive time pais
+    dive_time <- dafor_shp %>% 
+      summarise(sum(n_trans_vi)/60) 
+    
+    dive_time_pair <- round(dive_time$`sum(n_trans_vi)/60`, digits = 0)
+    
+    
+    
     # Return filtered shapefiles data
     list(
       filtered_dafor = filtered_dafor,
       filtered_geo = filtered_geo,
       filtered_pacs = filtered_pacs,
-      filtered_local = filtered_local
+      filtered_local = filtered_local,
+      n_location = n_location,
+      n_segments = n_segments,
+      n_cs_present = n_cs_present,
+      dive_time_pair = dive_time_pair
       
     )
   })
   
+  #infoboxes
+  
+  output$locations_Box <- renderInfoBox({
+    infoBox(
+      "Monitored Locations", paste0(reactiveData()$n_location), icon = icon("location-dot"),
+      color = "green"
+    )
+  })
+  
+  output$segments_Box <- renderInfoBox({
+    infoBox(
+      "Number of Segments", paste0(reactiveData()$n_segments), icon = icon("bacon"),
+      color = "orange"
+    )
+  })
+  
+  output$sun_coral_Box <- renderInfoBox({
+    infoBox(
+      "Transects with Sun Coral", paste0(reactiveData()$n_cs_present), icon = icon("circle-exclamation"),
+      color = "red"
+    )
+  })
+  
+  output$dive_time_box <- renderInfoBox({
+    infoBox(
+      "Dive time (h/pair of divers)", paste0(reactiveData()$dive_time_pair), icon = icon("clock"),
+      color = "blue"
+    )
+  })
+  
+  
+  #mapoutput
+  
   output$map <- renderLeaflet({
-    leaflet(options = leafletOptions(crs = leafletCRS(code=4326))) %>%
+    leaflet() %>%
       addProviderTiles("Esri.WorldImagery") %>% 
       #addTiles() %>%
       setView(-48.38, -27.28, zoom = 10) %>%
       addLegend(
-        position = "bottomright",
+        position = "bottomleft",
         colors = c("red", "blue", "orange", "green"),
         labels = c("Dafor", "Geomorphology", "Target Locations", "Locality"),
         title = "Legend"
-      )
+      ) 
   })
   
   observe({
@@ -148,13 +235,11 @@ server <- function(input, output, session) {
         )
     }
     
-    
-    
-    
-  })
+  }
+  )
+  
+  
+  
 }
 
-# Run the app
-shinyApp(ui = ui, server = server)
-
-
+shinyApp(ui, server)

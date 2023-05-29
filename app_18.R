@@ -57,10 +57,11 @@ ui <- dashboardPage(
     tags$style(type = "text/css", "#map {height: calc(100vh - 80px) !important;}"),
     
     fluidRow(
-      valueBoxOutput("locations_Box"),
-      valueBoxOutput("segments_Box"),
-      valueBoxOutput("sun_coral_Box"),
-      valueBoxOutput("dive_time_box")
+      infoBoxOutput("locations_Box", width = 3),
+      infoBoxOutput("segments_Box", width = 3),
+      infoBoxOutput("sun_coral_Box", width = 3),
+      infoBoxOutput("dive_time_box", width = 3),
+      height = "300px"
     ),
       
       fluidRow(
@@ -88,12 +89,13 @@ server <- function(input, output, session) {
     n_location <- dafor_shp %>% 
       count(localidade) %>% 
       nrow() 
+    
     #segments number
     n_segments <- dafor_shp %>% 
       count(dafor_id) %>% 
       nrow() 
     
-    #sum coral presence
+    #sum coral prevalence
     sum_cs_present <- dafor_shp %>% 
       summarise(sum(n_tr_pr)) 
       
@@ -123,33 +125,29 @@ server <- function(input, output, session) {
   
   #infoboxes
   
-  
-  
-  
-  
   output$locations_Box <- renderInfoBox({
-    valueBox(
+    infoBox(
       "Monitored Locations", paste0(reactiveData()$n_location), icon = icon("location-dot"),
       color = "green"
     )
   })
   
   output$segments_Box <- renderInfoBox({
-    valueBox(
-      "Number of Segments", paste0(reactiveData()$n_segments), icon = icon("slash"),
+    infoBox(
+      "Number of Segments", paste0(reactiveData()$n_segments), icon = icon("bacon"),
       color = "orange"
     )
   })
   
   output$sun_coral_Box <- renderInfoBox({
-    valueBox(
-      "Segments with Sun Coral", paste0(reactiveData()$n_cs_present), icon = icon("circle-exclamation"),
+    infoBox(
+      "Transects with Sun Coral", paste0(reactiveData()$n_cs_present), icon = icon("circle-exclamation"),
       color = "red"
     )
   })
   
   output$dive_time_box <- renderInfoBox({
-    valueBox(
+    infoBox(
       "Dive time (h/pair of divers)", paste0(reactiveData()$dive_time_pair), icon = icon("clock"),
       color = "blue"
     )
