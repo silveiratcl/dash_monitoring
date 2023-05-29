@@ -9,17 +9,6 @@ library(dplyr)
 
 
 # Import shapefiles data
-dafor_shp <- st_read("shp/dafor.shp", crs = 3857)
-dafor_shp <- st_transform(dafor_shp, crs = 3857)
-
-geo_shp <- st_read("shp/geomorfologia.shp", crs = 3857)
-geo_shp <- st_transform(geo_shp, crs = 3857)
-
-
-#st_crs(geo_shp)
-
-
-# leafleat EPSG:3857
 dafor_shp <- st_read("shp/dafor.shp")
 #dafor_crs <- st_crs("EPSG:3857")
 #dafor_shp <- st_transform(dafor_shp, dafor_crs)
@@ -30,16 +19,10 @@ geo_shp <- st_read("shp/geomorfologia.shp")
 #geo_shp <- st_transform(geo_shp, geo_crs)
 #print(geo_shp)
 
-<<<<<<< HEAD
-
-pacs_shp <- st_read("shp/pontos_pacs.shp")
-st_crs(pacs_shp) <- 3857
-=======
 pacs_shp <- st_read("shp/pts_pacs.shp")
 #pacs_crs <- st_crs("EPSG:3857")
 #pacs_shp <- st_transform(pacs_shp, pacs_crs)
 #print(pacs_shp)
->>>>>>> development
 
 local_shp <- st_read("shp/localidade.shp")
 #local_crs <- st_crs("EPSG:3857")
@@ -56,19 +39,19 @@ ui <- dashboardPage(
   
   dashboardSidebar(
     dateRangeInput(
-      "daterange", "Select date range: ",
-      format = "yyyy-mm-dd",
-      start = "2022-06-15",
-      end = "2023-12-31",
-      separator = " to "
-    ),
-    
-    checkboxGroupInput(
-      "layers",
-      label = "Select layer:",
-      choices = c("Dafor", "Geomorphology", "Target Locations", "Locality"),
-      selected = c("Dafor")
-    )),
+    "daterange", "Select date range: ",
+    format = "yyyy-mm-dd",
+    start = "2022-06-15",
+    end = "2023-12-31",
+    separator = " to "
+  ),
+  
+  checkboxGroupInput(
+    "layers",
+    label = "Select layer:",
+    choices = c("Dafor", "Geomorphology", "Target Locations", "Locality"),
+    selected = c("Dafor")
+  )),
   
   dashboardBody(
     tags$style(type = "text/css", "#map {height: calc(100vh - 80px) !important;}"),
@@ -80,13 +63,13 @@ ui <- dashboardPage(
       infoBoxOutput("dive_time_box", width = 3),
       height = "300px"
     ),
-    
-    fluidRow(
+      
+      fluidRow(
       box(leafletOutput("map"),
           width = "100%",
           height = "100%"
+          )
       )
-    )
   )
 )
 
@@ -115,9 +98,9 @@ server <- function(input, output, session) {
     #sum coral prevalence
     sum_cs_present <- dafor_shp %>% 
       summarise(sum(n_tr_pr)) 
-    
+      
     n_cs_present <- sum_cs_present$`sum(n_tr_pr)` 
-    
+
     #dive time pais
     dive_time <- dafor_shp %>% 
       summarise(sum(n_trans_vi)/60) 
@@ -125,7 +108,7 @@ server <- function(input, output, session) {
     dive_time_pair <- round(dive_time$`sum(n_trans_vi)/60`, digits = 0)
     
     
-    
+      
     # Return filtered shapefiles data
     list(
       filtered_dafor = filtered_dafor,
@@ -250,13 +233,13 @@ server <- function(input, output, session) {
           popup = ~paste0("<strong>Locality: </strong> ", localidade),
           labelOptions = labelOptions(noHide = FALSE, direction = "right")
         )
-    }
+      }
     
-  }
+    }
   )
   
   
   
-}
+  }
 
 shinyApp(ui, server)
