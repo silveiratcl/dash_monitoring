@@ -54,7 +54,8 @@ ui <- dashboardPage(
     )),
   
   dashboardBody(
-    tags$style(type = "text/css", "#map {height: calc(100vh - 80px) !important;}"),
+    tags$style(type = "text/css", "#map {height: calc(100vh - 200px) !important;}"),
+    
     
     fluidRow(
       infoBoxOutput("locations_Box", width = 3),
@@ -162,7 +163,7 @@ server <- function(input, output, session) {
       #addTiles() %>%
       setView(-48.38, -27.28, zoom = 10) %>%
       addLegend(
-        position = "bottomleft",
+        position = "topright",
         colors = c("red", "blue", "orange", "green"),
         labels = c("Dafor", "Geomorphology", "Target Locations", "Locality"),
         title = "Legend"
