@@ -31,10 +31,6 @@ geo_shp <- st_read("shp/geomorfologia.shp")
 #print(geo_shp)
 
 
-pacs_shp <- st_read("shp/pontos_pacs.shp")
-st_crs(pacs_shp) <- 3857
-
-
 pacs_shp <- st_read("shp/pts_pacs.shp")
 #pacs_crs <- st_crs("EPSG:3857")
 #pacs_shp <- st_transform(pacs_shp, pacs_crs)

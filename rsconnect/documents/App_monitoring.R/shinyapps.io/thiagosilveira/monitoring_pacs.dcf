@@ -5,10 +5,10 @@ account: thiagosilveira
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 8760931
-bundleId: 7239910
+bundleId: 7277757
 url: https://thiagosilveira.shinyapps.io/monitoring_pacs/
-when: 1684525639.14406
-lastSyncTime: 1684525639.14407
+when: 1685376999.019
+lastSyncTime: 1685376999.01901
 asMultiple: FALSE
 asStatic: FALSE
-ignoredFiles: .RData|app17.R|app18.R|app6.R|README.md|sun_coral_monitoring.R
+ignoredFiles: .RData|app_18.R|app17.R|app18.R|app6.R|README.md|sun_coral_monitoring.R
