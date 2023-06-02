@@ -7,28 +7,21 @@ library(sp)
 library(sf)
 library(dplyr)
 library(markdown)
+library(leaflet.extras)
 
 
 # Import shapefiles data
 dafor_shp <- st_read("shp/dafor.shp")
-#dafor_crs <- st_crs("EPSG:3857")
-#dafor_shp <- st_transform(dafor_shp, dafor_crs)
-print(dafor_shp)
 
 geo_shp <- st_read("shp/geomorfologia.shp")
-#geo_crs <- st_crs("EPSG:3857")
-#geo_shp <- st_transform(geo_shp, geo_crs)
-#print(geo_shp)
 
 pacs_shp <- st_read("shp/pts_pacs.shp")
-#pacs_crs <- st_crs("EPSG:3857")
-#pacs_shp <- st_transform(pacs_shp, pacs_crs)
-#print(pacs_shp)
 
 local_shp <- st_read("shp/localidade.shp")
-#local_crs <- st_crs("EPSG:3857")
-#local_shp <- st_transform(local_shp, local_crs)
-#print(local_shp)
+
+rebio_shp <- st_read("shp/limite_rebio.shp")
+
+occ_shp <- st_read("shp/manchas_cs.shp")
 
 
 # Sidebar Menu
@@ -40,7 +33,7 @@ local_shp <- st_read("shp/localidade.shp")
                  dateRangeInput(
       "daterange", "Select date range: ",
       format = "yyyy-mm-dd",
-      start = "2022-06-15",
+      start = "2012-01-1",
       end = "2023-12-31",
       separator = " to "
     ),
@@ -48,8 +41,8 @@ local_shp <- st_read("shp/localidade.shp")
     checkboxGroupInput(
       "layers",
       label = "Select layer:",
-      choices = c("Dafor", "Geomorphology", "Target Locations", "Locality"),
-      selected = c("Dafor")
+      choices = c("Occurrence Sun Coral", "Dafor", "Geomorphology", "Target Locations", "Locality", "REBIO Limits" ),
+      selected = c("Occurrence Sun Coral")
     )),
       menuItem("Documentation", 
                tabName = "documentation", 
@@ -98,9 +91,17 @@ server <- function(input, output, session) {
   reactiveData <- reactive({
     # Filter shapefiles data based on selected date range
     filtered_dafor <- dafor_shp[dafor_shp$data >= input$daterange[1] & dafor_shp$data <= input$daterange[2], ]
+    
     filtered_geo <- geo_shp[geo_shp$data >= input$daterange[1] & geo_shp$data <= input$daterange[2], ]
+    
+    filtered_occ <- occ_shp[occ_shp$data >= input$daterange[1] & occ_shp$data <= input$daterange[2], ]
+   
     filtered_pacs <- pacs_shp
+    
     filtered_local <- local_shp
+    
+    filtered_rebio <- rebio_shp
+    
     
     #boxesdata
     
@@ -134,6 +135,10 @@ server <- function(input, output, session) {
       filtered_geo = filtered_geo,
       filtered_pacs = filtered_pacs,
       filtered_local = filtered_local,
+      filtered_rebio = filtered_rebio,
+      filtered_occ = filtered_occ, 
+      
+    # Return boxes data
       n_location = n_location,
       n_segments = n_segments,
       n_cs_present = n_cs_present,
@@ -179,13 +184,13 @@ server <- function(input, output, session) {
     leaflet() %>%
       addProviderTiles("Esri.WorldImagery") %>% 
       #addTiles() %>%
-      setView(-48.38, -27.28, zoom = 10) %>%
-      addLegend(
-        position = "topright",
-        colors = c("red", "blue", "orange", "green"),
-        labels = c("Dafor", "Geomorphology", "Target Locations", "Locality"),
-        title = "Legend"
-      ) 
+      setView(-48.38, -27.28, zoom = 10) #%>%
+      #addLegend(
+       #position = "topright",
+       #colors = c("red", "blue", "orange", "green"),
+       #labels = c("Dafor", "Geomorphology", "Target Locations", "Locality"),
+       #title = "Legend"
+      #) 
   })
   
   observe({
@@ -194,7 +199,8 @@ server <- function(input, output, session) {
       clearShapes()
     
     # Show/hide layers based on checkbox input
-    if ("Dafor" %in% input$layers && nrow(reactiveData()$filtered_dafor) > 0) {
+   
+     if ("Dafor" %in% input$layers && nrow(reactiveData()$filtered_dafor) > 0) {
       leafletProxy("map", data = reactiveData()$filtered_dafor) %>%
         addPolylines(
           fillColor = "red",
@@ -253,6 +259,32 @@ server <- function(input, output, session) {
           labelOptions = labelOptions(noHide = FALSE, direction = "right")
         )
       }
+    
+    if ("Occurrence Sun Coral" %in% input$layers && nrow(reactiveData()$filtered_occ) > 0) {
+      leafletProxy("map", data = reactiveData()$filtered_occ) %>%
+        addCircles(
+          fillColor = "red",
+          fillOpacity = 0.5,
+          color = "red",
+          weight = 8,
+          popup = ~paste0("<strong>Locality: </strong> ", localidade, "<br>",
+                          "<strong>Date found: </strong> ", data),
+          labelOptions = labelOptions(noHide = FALSE, direction = "right") #add pulse marker
+        )
+    }
+    
+    if ("REBIO Limits" %in% input$layers && nrow(reactiveData()$filtered_rebio) > 0) {
+      leafletProxy("map", data = reactiveData()$filtered_rebio) %>%
+        addPolylines(
+          fillColor = "red",
+          fillOpacity = 0.5,
+          color = "red",
+          weight = 4,
+          popup = ~paste0( local ),
+          labelOptions = labelOptions(noHide = FALSE, direction = "right")
+        )
+    }
+
     })
   
     output$markdown_content <- renderUI({
