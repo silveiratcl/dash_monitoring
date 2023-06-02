@@ -11,17 +11,6 @@ library(leaflet.extras)
 
 
 # Import shapefiles data
-dafor_shp <- st_read("shp/dafor.shp", crs = 3857)
-dafor_shp <- st_transform(dafor_shp, crs = 3857)
-
-geo_shp <- st_read("shp/geomorfologia.shp", crs = 3857)
-geo_shp <- st_transform(geo_shp, crs = 3857)
-
-
-#st_crs(geo_shp)
-
-
-# leafleat EPSG:3857
 dafor_shp <- st_read("shp/dafor.shp")
 
 geo_shp <- st_read("shp/geomorfologia.shp")
@@ -36,63 +25,63 @@ occ_shp <- st_read("shp/manchas_cs.shp")
 
 
 # Sidebar Menu
-
-sidebar <- dashboardSidebar(
   
-  sidebarMenu(
-    menuItem("Monitoring Map", tabname = "map", icon = icon("map"),
-             dateRangeInput(
-               "daterange", "Select date range: ",
-               format = "yyyy-mm-dd",
-               start = "2012-01-1",
-               end = "2023-12-31",
-               separator = " to "
-             ),
-             
-             checkboxGroupInput(
-               "layers",
-               label = "Select layer:",
-               choices = c("Occurrence Sun Coral", "Dafor", "Geomorphology", "Target Locations", "Locality", "REBIO Limits" ),
-               selected = c("Occurrence Sun Coral")
-             )),
-    menuItem("Documentation", 
-             tabName = "documentation", 
-             icon = icon("file-text"))
-  )
-)  
+  sidebar <- dashboardSidebar(
+    
+    sidebarMenu(
+      menuItem("Monitoring Map", tabname = "map", icon = icon("map"),
+                 dateRangeInput(
+      "daterange", "Select date range: ",
+      format = "yyyy-mm-dd",
+      start = "2012-01-1",
+      end = "2023-12-31",
+      separator = " to "
+    ),
 
-
-
-body <- dashboardBody(
-  tags$style(type = "text/css", "#map {height: calc(100vh - 200px) !important;}"),
+    checkboxGroupInput(
+      "layers",
+      label = "Select layer:",
+      choices = c("Occurrence Sun Coral", "Dafor", "Geomorphology", "Target Locations", "Locality", "REBIO Limits" ),
+      selected = c("Occurrence Sun Coral")
+    )),
+      menuItem("Documentation", 
+               tabName = "documentation", 
+               icon = icon("file-text"))
+    )
+  )  
   
   
-  fluidRow(
-    infoBoxOutput("locations_Box", width = 3),
-    infoBoxOutput("segments_Box", width = 3),
-    infoBoxOutput("sun_coral_Box", width = 3),
-    infoBoxOutput("dive_time_box", width = 3),
-    height = "300px"
-  ),
   
-  fluidRow(
-    box(leafletOutput("map"),
-        width = "100%",
-        height = "100%"
+  body <- dashboardBody(
+    tags$style(type = "text/css", "#map {height: calc(100vh - 200px) !important;}"),
+    
+    
+    fluidRow(
+      infoBoxOutput("locations_Box", width = 3),
+      infoBoxOutput("segments_Box", width = 3),
+      infoBoxOutput("sun_coral_Box", width = 3),
+      infoBoxOutput("dive_time_box", width = 3),
+      height = "300px"
+    ),
+    
+    fluidRow(
+      box(leafletOutput("map"),
+          width = "100%",
+          height = "100%"
+      )
     )
   )
-)
 
-
-# Put them together into a dashboardPage
-
-ui <- dashboardPage(
-  skin = "yellow",
-  dashboardHeader(title = "Sun Coral Monitoring"),
-  sidebar,
-  body
-)
-
+  
+  # Put them together into a dashboardPage
+  
+  ui <- dashboardPage(
+     skin = "yellow",
+     dashboardHeader(title = "Sun Coral Monitoring"),
+     sidebar,
+     body
+     )
+  
 
 
 
@@ -106,7 +95,7 @@ server <- function(input, output, session) {
     filtered_geo <- geo_shp[geo_shp$data >= input$daterange[1] & geo_shp$data <= input$daterange[2], ]
     
     filtered_occ <- occ_shp[occ_shp$data >= input$daterange[1] & occ_shp$data <= input$daterange[2], ]
-    
+   
     filtered_pacs <- pacs_shp
     
     filtered_local <- local_shp
@@ -149,7 +138,7 @@ server <- function(input, output, session) {
       filtered_rebio = filtered_rebio,
       filtered_occ = filtered_occ, 
       
-      # Return boxes data
+    # Return boxes data
       n_location = n_location,
       n_segments = n_segments,
       n_cs_present = n_cs_present,
@@ -196,12 +185,12 @@ server <- function(input, output, session) {
       addProviderTiles("Esri.WorldImagery") %>% 
       #addTiles() %>%
       setView(-48.38, -27.28, zoom = 10) #%>%
-    #addLegend(
-    #position = "topright",
-    #colors = c("red", "blue", "orange", "green"),
-    #labels = c("Dafor", "Geomorphology", "Target Locations", "Locality"),
-    #title = "Legend"
-    #) 
+      #addLegend(
+       #position = "topright",
+       #colors = c("red", "blue", "orange", "green"),
+       #labels = c("Dafor", "Geomorphology", "Target Locations", "Locality"),
+       #title = "Legend"
+      #) 
   })
   
   observe({
@@ -210,8 +199,8 @@ server <- function(input, output, session) {
       clearShapes()
     
     # Show/hide layers based on checkbox input
-    
-    if ("Dafor" %in% input$layers && nrow(reactiveData()$filtered_dafor) > 0) {
+   
+     if ("Dafor" %in% input$layers && nrow(reactiveData()$filtered_dafor) > 0) {
       leafletProxy("map", data = reactiveData()$filtered_dafor) %>%
         addPolylines(
           fillColor = "red",
@@ -269,7 +258,7 @@ server <- function(input, output, session) {
           popup = ~paste0("<strong>Locality: </strong> ", localidade),
           labelOptions = labelOptions(noHide = FALSE, direction = "right")
         )
-    }
+      }
     
     if ("Occurrence Sun Coral" %in% input$layers && nrow(reactiveData()$filtered_occ) > 0) {
       leafletProxy("map", data = reactiveData()$filtered_occ) %>%
@@ -295,18 +284,18 @@ server <- function(input, output, session) {
           labelOptions = labelOptions(noHide = FALSE, direction = "right")
         )
     }
-    
-  })
+
+    })
   
-  output$markdown_content <- renderUI({
-    req(input$documentation)
-    tabPanel(
-      title = "Documentation",
-      div(
-        includeMarkdown(input$documentation)
+    output$markdown_content <- renderUI({
+      req(input$documentation)
+      tabPanel(
+        title = "Documentation",
+        div(
+          includeMarkdown(input$documentation)
+        )
       )
-    )
-  })
+    })
 }
 
 shinyApp(ui, server)
