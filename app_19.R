@@ -269,7 +269,7 @@ server <- function(input, output, session) {
           weight = 8,
           popup = ~paste0("<strong>Locality: </strong> ", localidade, "<br>",
                           "<strong>Date found: </strong> ", data),
-          labelOptions = labelOptions(noHide = FALSE, direction = "right") #add pulse marker
+          labelOptions = labelOptions(noHide = FALSE, direction = "right") #add pulse marker see chatgpt
         )
     }
     
