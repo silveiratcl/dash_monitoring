@@ -25,7 +25,7 @@ occ_shp <- st_read("shp/manchas_cs.shp")
 
 # Create indicators layers
 
-  # N transects with sun coral
+# N transects with sun coral
 
 dafor_mrg_local_shp <- dafor_shp %>%
   data.frame() %>%
@@ -34,7 +34,7 @@ dafor_mrg_local_shp <- dafor_shp %>%
   st_as_sf(sf_column_name = "geometry.y")
 
 
-  # IAH localities
+# IAH localities
 
 geo_mrg_local_shp <- geo_shp %>%
   data.frame() %>%
@@ -63,14 +63,14 @@ sidebar <- dashboardSidebar(
                choices = c("Transects with Sun Coral", "Habitat Suitability Index"),
                selected = c("Transects with Sun Coral")
              ),
-    
+             
              checkboxGroupInput(
                "layers",
                label = "Data:",
                choices = c("Occurrence", "Dafor", "Geomorphology", "Target Locations", "Locality", "REBIO Limits" ),
                selected = c("Occurrence")
              )),
-  
+    
     menuItem("Documentation (soon)", 
              tabName = "documentation", 
              icon = icon("file-text"))
@@ -210,7 +210,7 @@ server <- function(input, output, session) {
     )
   })
   
-
+  
   
   #mapoutput
   
@@ -223,7 +223,9 @@ server <- function(input, output, session) {
   observe({
     # Clear the map
     leafletProxy("map") %>%
-      clearShapes()
+      clearShapes() %>% 
+      clearControls()
+      
     
     # Show/hide layers based on checkbox input
     
@@ -313,14 +315,27 @@ server <- function(input, output, session) {
     }
     
     if ("Transects with Sun Coral" %in% input$indicators && nrow(reactiveData()$filtered_dafor_mrg_local) > 0) {
+      
+      pal <- colorNumeric(
+        palette = "Reds",
+        domain = reactiveData()$filtered_dafor_mrg_local$n_tr_pr
+      )
+      
+      
       leafletProxy("map", data = reactiveData()$filtered_dafor_mrg_local) %>%
         addPolylines(
           fillColor = "red",
           fillOpacity = 0.5,
           color = "red",
           weight = 4,
-          popup = ~paste0( n_tr_pr),
+          #popup = ~paste0( n_tr_pr),
           labelOptions = labelOptions(noHide = FALSE, direction = "right")
+        )%>%
+        addLegend(
+          pal = pal,
+          values = reactiveData()$filtered_dafor_mrg_local$n_tr_pr,
+          position = "bottomright",
+          title = "Transects with sun coral",
         )
     }
     

@@ -1,3 +1,4 @@
+
 library(shiny)
 library(shinydashboard)
 library(htmlwidgets)
@@ -9,44 +10,32 @@ library(dplyr)
 library(markdown)
 library(leaflet.extras)
 
-
 # Import shapefiles data
 dafor_shp <- st_read("shp/dafor.shp")
-
 geo_shp <- st_read("shp/geomorfologia.shp")
-
 pacs_shp <- st_read("shp/pts_pacs.shp")
-
 local_shp <- st_read("shp/localidade.shp")
-
 rebio_shp <- st_read("shp/limite_rebio.shp")
-
 occ_shp <- st_read("shp/manchas_cs.shp")
 
 # Create indicators layers
 
-  # N transects with sun coral
-
+# N transects with sun coral
 dafor_mrg_local_shp <- dafor_shp %>%
   data.frame() %>%
   {merge(., local_shp, by = "localidade", all.x = TRUE)} %>%
   filter(!st_is_empty(geometry.y)) %>%
   st_as_sf(sf_column_name = "geometry.y")
 
-
-  # IAH localities
-
+# IAH localities
 geo_mrg_local_shp <- geo_shp %>%
   data.frame() %>%
   merge(., local_shp, by = "localidade", all.x = TRUE) %>%
   filter(!st_is_empty(geometry.y)) %>%
   st_as_sf(sf_column_name = "geometry.y")
 
-
 # Sidebar Menu
-
 sidebar <- dashboardSidebar(
-  
   sidebarMenu(
     menuItem("Monitoring Map", tabname = "map", icon = icon("map"),
              dateRangeInput(
@@ -63,25 +52,22 @@ sidebar <- dashboardSidebar(
                choices = c("Transects with Sun Coral", "Habitat Suitability Index"),
                selected = c("Transects with Sun Coral")
              ),
-    
+             
              checkboxGroupInput(
                "layers",
                label = "Data:",
-               choices = c("Occurrence", "Dafor", "Geomorphology", "Target Locations", "Locality", "REBIO Limits" ),
+               choices = c("Occurrence", "Dafor", "Geomorphology", "Target Locations", "Locality", "REBIO Limits"),
                selected = c("Occurrence")
-             )),
-  
+             )
+    ),
     menuItem("Documentation (soon)", 
              tabName = "documentation", 
              icon = icon("file-text"))
   )
-)  
-
-
+)
 
 body <- dashboardBody(
   tags$style(type = "text/css", "#map {height: calc(100vh - 200px) !important;}"),
-  
   
   fluidRow(
     infoBoxOutput("locations_Box", width = 3),
@@ -99,9 +85,7 @@ body <- dashboardBody(
   )
 )
 
-
 # Put them together into a dashboardPage
-
 ui <- dashboardPage(
   skin = "yellow",
   dashboardHeader(title = "Sun Coral Monitoring"),
@@ -109,33 +93,20 @@ ui <- dashboardPage(
   body
 )
 
-
-
-
 server <- function(input, output, session) { 
-  
   # Define reactive data
   reactiveData <- reactive({
     # Filter shapefiles data based on selected date range
     filtered_dafor <- dafor_shp[dafor_shp$data >= input$daterange[1] & dafor_shp$data <= input$daterange[2], ]
-    
     filtered_geo <- geo_shp[geo_shp$data >= input$daterange[1] & geo_shp$data <= input$daterange[2], ]
-    
     filtered_occ <- occ_shp[occ_shp$data >= input$daterange[1] & occ_shp$data <= input$daterange[2], ]
-    
     filtered_dafor_mrg_local <- dafor_mrg_local_shp[dafor_mrg_local_shp$data >= input$daterange[1] & dafor_mrg_local_shp$data <= input$daterange[2], ]
-    
     filtered_geo_mrg_local_shp <- geo_mrg_local_shp[geo_mrg_local_shp$data >= input$daterange[1] & geo_mrg_local_shp$data <= input$daterange[2], ]
-    
     filtered_pacs <- pacs_shp
-    
     filtered_local <- local_shp
-    
     filtered_rebio <- rebio_shp
     
-    
     #boxesdata
-    
     #location number
     n_location <- dafor_shp %>% 
       count(localidade) %>% 
@@ -158,8 +129,6 @@ server <- function(input, output, session) {
     
     dive_time_pair <- round(dive_time$`sum(n_trans_vi)/60`, digits = 0)
     
-    
-    
     # Return filtered shapefiles data
     list(
       filtered_dafor = filtered_dafor,
@@ -181,7 +150,6 @@ server <- function(input, output, session) {
   })
   
   #infoboxes
-  
   output$locations_Box <- renderInfoBox({
     infoBox(
       "Monitored Locations", paste0(reactiveData()$n_location), icon = icon("location-dot"),
@@ -210,10 +178,7 @@ server <- function(input, output, session) {
     )
   })
   
-
-  
   #mapoutput
-  
   output$map <- renderLeaflet({
     leaflet() %>%
       addProviderTiles("Esri.WorldImagery") %>% 
@@ -223,14 +188,19 @@ server <- function(input, output, session) {
   observe({
     # Clear the map
     leafletProxy("map") %>%
-      clearShapes()
+      clearShapes() %>% 
+      clearControls("")
     
     # Show/hide layers based on checkbox input
-    
     if ("Dafor" %in% input$layers && nrow(reactiveData()$filtered_dafor) > 0) {
+      pal <- colorNumeric(
+        palette = "Reds",
+        domain = reactiveData()$filtered_dafor$column_name
+      )
+      
       leafletProxy("map", data = reactiveData()$filtered_dafor) %>%
         addPolylines(
-          fillColor = "red",
+          fillColor = ~pal(column_name),
           fillOpacity = 0.5,
           color = "red",
           weight = 8,
@@ -243,13 +213,24 @@ server <- function(input, output, session) {
             "<strong>Distance(m): </strong> ", comp_m
           ),
           labelOptions = labelOptions(noHide = FALSE, direction = "right")
+        ) %>%
+        addLegend(
+          pal = pal,
+          values = reactiveData()$filtered_dafor$column_name,
+          position = "bottomright",
+          title = "Legend"
         )
     }
     
     if ("Geomorphology" %in% input$layers && nrow(reactiveData()$filtered_geo) > 0) {
+      pal <- colorNumeric(
+        palette = "Blues",
+        domain = reactiveData()$filtered_geo$column_name
+      )
+      
       leafletProxy("map", data = reactiveData()$filtered_geo) %>%
         addPolylines(
-          fillColor = "blue",
+          fillColor = ~pal(column_name),
           fillOpacity = 0.5,
           color = "blue",
           weight = 8,
@@ -260,82 +241,60 @@ server <- function(input, output, session) {
             "<strong>Distancia(m): </strong> ", comp_m
           ),
           labelOptions = labelOptions(noHide = FALSE, direction = "right")
-        )
-    }
-    
-    if ("Target Locations" %in% input$layers && nrow(reactiveData()$filtered_pacs) > 0) {
-      leafletProxy("map", data = reactiveData()$filtered_pacs) %>%
-        addCircles(
-          fillColor = "orange",
-          fillOpacity = 0.5,
-          color = "orange",
-          weight = 8,
-          popup = ~paste0("<strong>Locality: </strong> ", locality),
-          labelOptions = labelOptions(noHide = FALSE, direction = "right")
-        )
-    }
-    
-    if ("Locality" %in% input$layers && nrow(reactiveData()$filtered_local) > 0) {
-      leafletProxy("map", data = reactiveData()$filtered_local) %>%
-        addPolylines(
-          fillColor = "green",
-          fillOpacity = 0.5,
-          color = "green",
-          weight = 8,
-          popup = ~paste0("<strong>Locality: </strong> ", localidade),
-          labelOptions = labelOptions(noHide = FALSE, direction = "right")
-        )
-    }
-    
-    if ("Occurrence" %in% input$layers && nrow(reactiveData()$filtered_occ) > 0) {
-      leafletProxy("map", data = reactiveData()$filtered_occ) %>%
-        addCircles(
-          fillColor = "red",
-          fillOpacity = 0.5,
-          color = "red",
-          weight = 8,
-          popup = ~paste0("<strong>Locality: </strong> ", localidade, "<br>",
-                          "<strong>Date found: </strong> ", data),
-          labelOptions = labelOptions(noHide = FALSE, direction = "right") #add pulse marker see chatgpt
-        )
-    }
-    
-    if ("REBIO Limits" %in% input$layers && nrow(reactiveData()$filtered_rebio) > 0) {
-      leafletProxy("map", data = reactiveData()$filtered_rebio) %>%
-        addPolylines(
-          fillColor = "red",
-          fillOpacity = 0.5,
-          color = "red",
-          weight = 4,
-          popup = ~paste0( local ),
-          labelOptions = labelOptions(noHide = FALSE, direction = "right")
+        ) %>%
+        addLegend(
+          pal = pal,
+          values = reactiveData()$filtered_geo$column_name,
+          position = "bottomright",
+          title = "Legend"
         )
     }
     
     if ("Transects with Sun Coral" %in% input$indicators && nrow(reactiveData()$filtered_dafor_mrg_local) > 0) {
+      pal <- colorNumeric(
+        palette = "Reds",
+        domain = reactiveData()$filtered_dafor_mrg_local$n_tr_pr
+      )
+      
       leafletProxy("map", data = reactiveData()$filtered_dafor_mrg_local) %>%
         addPolylines(
-          fillColor = "red",
+          fillColor = ~pal(n_tr_pr),
           fillOpacity = 0.5,
           color = "red",
           weight = 4,
-          popup = ~paste0( n_tr_pr),
+          popup = ~paste0(n_tr_pr),
           labelOptions = labelOptions(noHide = FALSE, direction = "right")
+        ) %>%
+        addLegend(
+          pal = pal,
+          values = reactiveData()$filtered_dafor_mrg_local$n_tr_pr,
+          position = "bottomright",
+          title = "Legend"
         )
     }
     
     if ("Habitat Suitability Index" %in% input$indicators && nrow(reactiveData()$filtered_geo_mrg_local_shp) > 0) {
+      pal <- colorNumeric(
+        palette = "Reds",
+        domain = reactiveData()$filtered_geo_mrg_local_shp$iah_seg
+      )
+      
       leafletProxy("map", data = reactiveData()$filtered_geo_mrg_local_shp) %>%
         addPolylines(
-          fillColor = "red",
+          fillColor = ~pal(iah_seg),
           fillOpacity = 0.5,
           color = "red",
           weight = 4,
-          popup = ~paste0(mean(iah_seg) ),
+          popup = ~paste0(mean(iah_seg)),
           labelOptions = labelOptions(noHide = FALSE, direction = "right")
+        ) %>%
+        addLegend(
+          pal = pal,
+          values = reactiveData()$filtered_geo_mrg_local_shp$iah_seg,
+          position = "bottomright",
+          title = "Legend"
         )
     }
-    
   })
   
   output$markdown_content <- renderUI({
