@@ -11,6 +11,7 @@ library(leaflet.extras)
 
 
 # Import shapefiles data
+
 dafor_shp <- st_read("shp/dafor.shp")
 
 geo_shp <- st_read("shp/geomorfologia.shp")
