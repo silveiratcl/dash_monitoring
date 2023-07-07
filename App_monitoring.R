@@ -25,21 +25,27 @@ occ_shp <- st_read("shp/manchas_cs.shp")
 
 # Create indicators layers
 
-  # N transects with sun coral
+# N transects with sun coral
 
 dafor_mrg_local_shp <- dafor_shp %>%
   data.frame() %>%
-  {merge(., local_shp, by = "localidade", all.x = TRUE)} %>%
-  filter(!st_is_empty(geometry.y)) %>%
+  merge(., local_shp, by = "localidade", all.x = TRUE) %>%
+  filter(!st_is_empty(geometry.y)) %>% #Temporary - need create localities to all monitored site
+  group_by(localidade, data) %>% 
+  mutate(n_tr_pr_sum = sum(n_tr_pr)) %>% 
+  select(-c(geometry.x)) %>% 
   st_as_sf(sf_column_name = "geometry.y")
 
 
-  # IAH localities
+# IAH localities
 
 geo_mrg_local_shp <- geo_shp %>%
   data.frame() %>%
   merge(., local_shp, by = "localidade", all.x = TRUE) %>%
-  filter(!st_is_empty(geometry.y)) %>%
+  filter(!st_is_empty(geometry.y)) %>% #Temporary - need create localities to all monitored site
+  group_by(localidade, data) %>% 
+  mutate(iah_seg_avg = mean(iah_seg)) %>% 
+  select(-c(geometry.x)) %>% 
   st_as_sf(sf_column_name = "geometry.y")
 
 
@@ -63,17 +69,21 @@ sidebar <- dashboardSidebar(
                choices = c("Transects with Sun Coral", "Habitat Suitability Index"),
                selected = c("Transects with Sun Coral")
              ),
-    
+             
              checkboxGroupInput(
                "layers",
                label = "Data:",
                choices = c("Occurrence", "Dafor", "Geomorphology", "Target Locations", "Locality", "REBIO Limits" ),
                selected = c("Occurrence")
              )),
-  
-    menuItem("Documentation (soon)", 
+    
+    menuItem("Documentation", 
              tabName = "documentation", 
-             icon = icon("file-text"))
+             icon = icon("file-text"),
+             menuSubItem(text = "About the Dashboard", 
+                         href = "https://www.notion.so/PACS-Monitoring-Dashboard-09d8969b1ff14e3ab8bd1f73de6a0906?pvs=4",
+                         newtab = T)
+    )
   )
 )  
 
@@ -125,7 +135,7 @@ server <- function(input, output, session) {
     
     filtered_dafor_mrg_local <- dafor_mrg_local_shp[dafor_mrg_local_shp$data >= input$daterange[1] & dafor_mrg_local_shp$data <= input$daterange[2], ]
     
-    filtered_geo_mrg_local_shp <- geo_mrg_local_shp[geo_mrg_local_shp$data >= input$daterange[1] & geo_mrg_local_shp$data <= input$daterange[2], ]
+    filtered_geo_mrg_local <- geo_mrg_local_shp[geo_mrg_local_shp$data >= input$daterange[1] & geo_mrg_local_shp$data <= input$daterange[2], ]
     
     filtered_pacs <- pacs_shp
     
@@ -169,7 +179,7 @@ server <- function(input, output, session) {
       filtered_rebio = filtered_rebio,
       filtered_occ = filtered_occ,
       filtered_dafor_mrg_local = filtered_dafor_mrg_local,
-      filtered_geo_mrg_local_shp = filtered_geo_mrg_local_shp,
+      filtered_geo_mrg_local = filtered_geo_mrg_local,
       
       # Return boxes data
       n_location = n_location,
@@ -210,20 +220,22 @@ server <- function(input, output, session) {
     )
   })
   
-
+  
   
   #mapoutput
   
   output$map <- renderLeaflet({
     leaflet() %>%
       addProviderTiles("Esri.WorldImagery") %>% 
-      setView(-48.38, -27.28, zoom = 10) 
+      setView(-48.38, -27.28, zoom = 12) 
   })
   
   observe({
-    # Clear the map
+    # Clear the map when "on' "off" layers from checkbox input
     leafletProxy("map") %>%
-      clearShapes()
+      clearShapes() %>% 
+      clearControls()
+    
     
     # Show/hide layers based on checkbox input
     
@@ -313,39 +325,57 @@ server <- function(input, output, session) {
     }
     
     if ("Transects with Sun Coral" %in% input$indicators && nrow(reactiveData()$filtered_dafor_mrg_local) > 0) {
+      
+      pal_twsc <- colorNumeric(
+        palette = rev(c("#BE2A3E","#CD4242","#E76B49","#F7B059","#F5CA63","#EACF65","#D6CA64","#5DA25F","#449559","#22763F")),
+        domain = reactiveData()$filtered_dafor_mrg_local$n_tr_pr_sum
+      )
+      
+      
+      
       leafletProxy("map", data = reactiveData()$filtered_dafor_mrg_local) %>%
         addPolylines(
-          fillColor = "red",
-          fillOpacity = 0.5,
-          color = "red",
-          weight = 4,
-          popup = ~paste0( n_tr_pr),
+          fillColor = ~pal_twsc(n_tr_pr_sum),
+          color = ~pal_twsc(n_tr_pr_sum),
+          weight = 10,
+          popup = ~paste0("<strong>Locality: </strong> ", localidade, "<br>",
+                          "<strong>Transects with sun coral: </strong> ", n_tr_pr_sum),
           labelOptions = labelOptions(noHide = FALSE, direction = "right")
+        )%>%
+        addLegend(
+          pal = pal_twsc,
+          values = reactiveData()$filtered_dafor_mrg_local$n_tr_pr_sum,
+          position = "bottomright",
+          title = ~paste0("Transects","<br>","with","<br>","sun coral"),
         )
     }
     
-    if ("Habitat Suitability Index" %in% input$indicators && nrow(reactiveData()$filtered_geo_mrg_local_shp) > 0) {
-      leafletProxy("map", data = reactiveData()$filtered_geo_mrg_local_shp) %>%
-        addPolylines(
-          fillColor = "red",
-          fillOpacity = 0.5,
-          color = "red",
-          weight = 4,
-          popup = ~paste0(mean(iah_seg) ),
-          labelOptions = labelOptions(noHide = FALSE, direction = "right")
-        )
-    }
+    #iah_seg_avg
     
-  })
-  
-  output$markdown_content <- renderUI({
-    req(input$documentation)
-    tabPanel(
-      title = "Documentation",
-      div(
-        includeMarkdown(input$documentation)
+    if ("Habitat Suitability Index" %in% input$indicators && nrow(reactiveData()$filtered_geo_mrg_local) > 0) {
+      
+      pal_iah <- colorNumeric(
+        palette = "Blues",
+        domain = reactiveData()$filtered_geo_mrg_local$iah_seg_avg
       )
-    )
+      
+      
+      
+      leafletProxy("map", data = reactiveData()$filtered_geo_mrg_local) %>%
+        addPolylines(
+          fillColor = ~pal_iah(iah_seg_avg),
+          color = ~pal_iah(iah_seg_avg),
+          weight = 10,
+          popup = ~paste0("<strong>HSI: </strong> ", iah_seg_avg) ,
+          labelOptions = labelOptions(noHide = FALSE, direction = "right")
+        )%>%
+        addLegend(
+          pal = pal_iah,
+          values = reactiveData()$filtered_geo_mrg_local$iah_seg_avg,
+          position = "bottomright",
+          title = ~paste0("Habitat","<br>","Suitability","<br>","Index")
+        )
+    }
   })
 }
 
