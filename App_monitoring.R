@@ -49,6 +49,17 @@ geo_mrg_local_shp <- geo_shp %>%
   select(-c(geometry.x)) %>% 
   st_as_sf(sf_column_name = "geometry.y")
 
+# Monitoring Effort transects 
+
+effort_mrg_local_shp <- dafor_shp %>% 
+  data.frame() %>% 
+  merge(., local_shp, by = "localidade", all.x = TRUE) %>%
+  filter(!st_is_empty(geometry.y)) %>% #Temporary - need create localities to all monitored site
+  group_by(localidade, data) %>% 
+  mutate(n_tr_pr_1000 = round(sum(n_tr_pr)/(sum(comp_m)/1000),3)) %>% 
+  select(-c(geometry.x)) %>% 
+  st_as_sf(sf_column_name = "geometry.y")
+
 
 # Sidebar Menu
 
@@ -67,8 +78,8 @@ sidebar <- dashboardSidebar(
              checkboxGroupInput(
                "indicators",
                label = "Indicators:",
-               choices = c("Transects with Sun Coral", "Habitat Suitability Index"),
-               selected = c("Transects with Sun Coral")
+               choices = c("Transects with Sun Coral(TWSC)", "Habitat Suitability Index(HSI)", "TWSC/1000m"),
+               selected = c("Transects with Sun Coral(TWSC)")
              ),
              
              checkboxGroupInput(
@@ -82,7 +93,7 @@ sidebar <- dashboardSidebar(
              tabName = "documentation", 
              icon = icon("file-text"),
              menuSubItem(text = "About the Dashboard", 
-                         href = "https://www.notion.so/PACS-Monitoring-Dashboard-09d8969b1ff14e3ab8bd1f73de6a0906?pvs=4",
+                         href = "https://dent-packet-5b9.notion.site/PACS-Monitoring-Dashboard-09d8969b1ff14e3ab8bd1f73de6a0906?pvs=4",
                          newtab = T)
     )
   )
@@ -138,6 +149,8 @@ server <- function(input, output, session) {
     
     filtered_geo_mrg_local <- geo_mrg_local_shp[geo_mrg_local_shp$data >= input$daterange[1] & geo_mrg_local_shp$data <= input$daterange[2], ]
     
+    filtered_effort_mrg_local <- effort_mrg_local_shp[effort_mrg_local_shp$data >= input$daterange[1] & effort_mrg_local_shp$data <= input$daterange[2], ]
+    
     filtered_pacs <- pacs_shp
     
     filtered_local <- local_shp
@@ -181,6 +194,7 @@ server <- function(input, output, session) {
       filtered_occ = filtered_occ,
       filtered_dafor_mrg_local = filtered_dafor_mrg_local,
       filtered_geo_mrg_local = filtered_geo_mrg_local,
+      filtered_effort_mrg_local = filtered_effort_mrg_local,
       
       # Return boxes data
       n_location = n_location,
@@ -325,13 +339,12 @@ server <- function(input, output, session) {
         )
     }
     
-    if ("Transects with Sun Coral" %in% input$indicators && nrow(reactiveData()$filtered_dafor_mrg_local) > 0) {
+    if ("Transects with Sun Coral(TWSC)" %in% input$indicators && nrow(reactiveData()$filtered_dafor_mrg_local) > 0) {
       
       pal_twsc <- colorNumeric(
         palette = rev(c("#BE2A3E","#CD4242","#E76B49","#F7B059","#F5CA63","#EACF65","#D6CA64","#5DA25F","#449559","#22763F")),
         domain = reactiveData()$filtered_dafor_mrg_local$n_tr_pr_sum
       )
-      
       
       
       leafletProxy("map", data = reactiveData()$filtered_dafor_mrg_local) %>%
@@ -347,19 +360,17 @@ server <- function(input, output, session) {
           pal = pal_twsc,
           values = reactiveData()$filtered_dafor_mrg_local$n_tr_pr_sum,
           position = "bottomright",
-          title = ~paste0("Transects","<br>","with","<br>","sun coral"),
+          title = ~paste0("TWSC"),
         )
     }
     
-    #iah_seg_avg
     
-    if ("Habitat Suitability Index" %in% input$indicators && nrow(reactiveData()$filtered_geo_mrg_local) > 0) {
+    if ("Habitat Suitability Index(HSI)" %in% input$indicators && nrow(reactiveData()$filtered_geo_mrg_local) > 0) {
       
       pal_iah <- colorNumeric(
         palette = "Blues",
         domain = reactiveData()$filtered_geo_mrg_local$iah_seg_avg
       )
-      
       
       
       leafletProxy("map", data = reactiveData()$filtered_geo_mrg_local) %>%
@@ -374,9 +385,35 @@ server <- function(input, output, session) {
           pal = pal_iah,
           values = reactiveData()$filtered_geo_mrg_local$iah_seg_avg,
           position = "bottomright",
-          title = ~paste0("Habitat","<br>","Suitability","<br>","Index")
+          title = ~paste0("HSI")
         )
     }
+    
+    
+    if ("TWSC/1000m" %in% input$indicators && nrow(reactiveData()$filtered_effort_mrg_local) > 0) {
+      
+      pal_effort <- colorNumeric(
+        palette = "Oranges",
+        domain = reactiveData()$filtered_effort_mrg_local$n_tr_pr_1000
+      )
+      
+      
+      leafletProxy("map", data = reactiveData()$filtered_effort_mrg_local) %>%
+        addPolylines(
+          fillColor = ~pal_effort(n_tr_pr_1000),
+          color = ~pal_effort(n_tr_pr_1000),
+          weight = 10,
+          popup = ~paste0("<strong>TWSC/1000: </strong> ", n_tr_pr_1000) ,
+          labelOptions = labelOptions(noHide = FALSE, direction = "right")
+        )%>%
+        addLegend(
+          pal = pal_effort,
+          values = reactiveData()$filtered_effort_mrg_local$n_tr_pr_1000,
+          position = "bottomright",
+          title = ~paste0("TWSC/1000m")
+        )
+    }
+    
   })
 }
 
