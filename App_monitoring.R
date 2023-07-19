@@ -49,7 +49,7 @@ geo_mrg_local_shp <- geo_shp %>%
   select(-c(geometry.x)) %>% 
   st_as_sf(sf_column_name = "geometry.y")
 
-# Monitoring Effort transects 
+# Monitoring Effort transects - positives by 1000 meters 
 
 effort_mrg_local_shp <- dafor_shp %>% 
   data.frame() %>% 
@@ -57,6 +57,17 @@ effort_mrg_local_shp <- dafor_shp %>%
   filter(!st_is_empty(geometry.y)) %>% #Temporary - need create localities to all monitored site
   group_by(localidade, data) %>% 
   mutate(n_tr_pr_1000 = round(sum(n_tr_pr)/(sum(comp_m)/1000),3)) %>% 
+  select(-c(geometry.x)) %>% 
+  st_as_sf(sf_column_name = "geometry.y")
+
+# Number of transects by locality
+
+ntrans_mrg_local_shp <- dafor_shp %>%
+  data.frame() %>%
+  merge(., local_shp, by = "localidade", all.x = TRUE) %>%
+  filter(!st_is_empty(geometry.y)) %>% #Temporary - need create localities to all monitored site
+  group_by(localidade, data) %>% 
+  mutate(n_trans = sum(n_trans_vi)) %>% 
   select(-c(geometry.x)) %>% 
   st_as_sf(sf_column_name = "geometry.y")
 
@@ -78,7 +89,10 @@ sidebar <- dashboardSidebar(
              checkboxGroupInput(
                "indicators",
                label = "Indicators:",
-               choices = c("Transects with Sun Coral(TWSC)", "Habitat Suitability Index(HSI)", "TWSC/1000m"),
+               choices = c("Transects with Sun Coral(TWSC)", 
+                           "Habitat Suitability Index(HSI)",
+                           "TWSC/1000m",
+                           "N. of Transects by Locality(NTL)"),
                selected = c("Transects with Sun Coral(TWSC)")
              ),
              
@@ -151,6 +165,8 @@ server <- function(input, output, session) {
     
     filtered_effort_mrg_local <- effort_mrg_local_shp[effort_mrg_local_shp$data >= input$daterange[1] & effort_mrg_local_shp$data <= input$daterange[2], ]
     
+    filtered_ntrans_mrg_local <- ntrans_mrg_local_shp[ntrans_mrg_local_shp$data >= input$daterange[1] & ntrans_mrg_local_shp$data <= input$daterange[2], ]
+   
     filtered_pacs <- pacs_shp
     
     filtered_local <- local_shp
@@ -176,7 +192,7 @@ server <- function(input, output, session) {
     
     n_cs_present <- sum_cs_present$`sum(n_tr_pr)` 
     
-    #dive time pais
+    #dive time pairs
     dive_time <- dafor_shp %>% 
       summarise(sum(n_trans_vi)/60) 
     
@@ -195,6 +211,7 @@ server <- function(input, output, session) {
       filtered_dafor_mrg_local = filtered_dafor_mrg_local,
       filtered_geo_mrg_local = filtered_geo_mrg_local,
       filtered_effort_mrg_local = filtered_effort_mrg_local,
+      filtered_ntrans_mrg_local = filtered_ntrans_mrg_local,
       
       # Return boxes data
       n_location = n_location,
@@ -411,6 +428,31 @@ server <- function(input, output, session) {
           values = reactiveData()$filtered_effort_mrg_local$n_tr_pr_1000,
           position = "bottomright",
           title = ~paste0("TWSC/1000m")
+        )
+    }
+    
+    
+    if ("N. of Transects by Locality(NTL)" %in% input$indicators && nrow(reactiveData()$filtered_ntrans_mrg_local) > 0) {
+      
+      pal_ntrans <- colorNumeric(
+        palette = "PuBu",
+        domain = reactiveData()$filtered_ntrans_mrg_local$n_trans
+      )
+      
+      
+      leafletProxy("map", data = reactiveData()$filtered_ntrans_mrg_local) %>%
+        addPolylines(
+          fillColor = ~pal_ntrans(n_trans),
+          color = ~pal_ntrans(n_trans),
+          weight = 10,
+          popup = ~paste0("<strong>N. of Transects: </strong> ", n_trans) ,
+          labelOptions = labelOptions(noHide = FALSE, direction = "right")
+        )%>%
+        addLegend(
+          pal = pal_ntrans,
+          values = reactiveData()$filtered_ntrans_mrg_local$n_trans,
+          position = "bottomright",
+          title = ~paste0("NTL")
         )
     }
     
