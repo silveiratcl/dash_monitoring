@@ -71,6 +71,11 @@ ntrans_mrg_local_shp <- dafor_shp %>%
   select(-c(geometry.x)) %>% 
   st_as_sf(sf_column_name = "geometry.y")
 
+# Days Elapsed since last management
+
+# Mass managed
+
+
 
 # Sidebar Menu
 
@@ -82,7 +87,6 @@ sidebar <- dashboardSidebar(
                "daterange", "Select date range: ",
                format = "yyyy-mm-dd",
                start = "2012-01-1",
-               end = "2023-12-31",
                separator = " to "
              ),
              
@@ -233,7 +237,7 @@ server <- function(input, output, session) {
   
   output$segments_Box <- renderInfoBox({
     infoBox(
-      "Number of Segments", paste0(reactiveData()$n_segments), icon = icon("bacon"),
+      "Segments monitored ", paste0(reactiveData()$n_segments), icon = icon("bacon"),
       color = "orange"
     )
   })
@@ -247,7 +251,7 @@ server <- function(input, output, session) {
   
   output$dive_time_box <- renderInfoBox({
     infoBox(
-      "Dive time (h/pair of divers)", paste0(reactiveData()$dive_time_pair), icon = icon("clock"),
+      "Dive time (hours)", paste0(reactiveData()$dive_time_pair), icon = icon("clock"),
       color = "blue"
     )
   })
