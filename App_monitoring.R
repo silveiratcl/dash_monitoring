@@ -218,7 +218,7 @@ server <- function(input, output, session) {
       filtered_ntrans_mrg_local = filtered_ntrans_mrg_local,
       
       # Return boxes data
-      n_location = n_location,
+      n_location = n_location, #MAKE IT REACTIVE TO DATE
       n_segments = n_segments,
       n_cs_present = n_cs_present,
       dive_time_pair = dive_time_pair
@@ -324,11 +324,15 @@ server <- function(input, output, session) {
     }
     
     if ("Locality" %in% input$layers && nrow(reactiveData()$filtered_local) > 0) {
+      
+      colors <- c("red", "blue", "green", "orange", "purple")
+      
       leafletProxy("map", data = reactiveData()$filtered_local) %>%
         addPolylines(
-          fillColor = "green",
-          fillOpacity = 0.5,
-          color = "green",
+          stroke = T,
+          fillColor = colors,
+          fillOpacity = 0.2,
+          color = colors,
           weight = 8,
           popup = ~paste0("<strong>Locality: </strong> ", localidade),
           labelOptions = labelOptions(noHide = FALSE, direction = "right")
