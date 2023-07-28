@@ -8,6 +8,8 @@ library(sf)
 library(dplyr)
 library(markdown)
 library(leaflet.extras)
+library(mapview)
+
 
 
 # Import shapefiles data
@@ -258,19 +260,20 @@ server <- function(input, output, session) {
   
   
   
-  #mapoutput
+  #map output
   
   output$map <- renderLeaflet({
     leaflet() %>%
       addProviderTiles("Esri.WorldImagery") %>% 
       setView(-48.38, -27.28, zoom = 12) 
+      
   })
   
   observe({
     # Clear the map when "on' "off" layers from checkbox input
     leafletProxy("map") %>%
       clearShapes() %>% 
-      clearControls()
+      clearControls() 
     
     
     # Show/hide layers based on checkbox input
