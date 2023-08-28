@@ -113,10 +113,7 @@ sidebar <- dashboardSidebar(
              icon = icon("file-text"),
              menuSubItem(text = "About the Dashboard", 
                          href = "https://dent-packet-5b9.notion.site/PACS-Monitoring-Dashboard-09d8969b1ff14e3ab8bd1f73de6a0906?pvs=4",
-                         newtab = T)),
-    
-    menuItem(paste0("Last update",": ",
-                    format(file.info("App_monitoring.R")$mtime, "%d-%m-%Y")))
+                         newtab = T))
     )
   )
   
