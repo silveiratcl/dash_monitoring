@@ -10,7 +10,7 @@ library(markdown)
 library(leaflet.extras)
 library(mapview)
 
-
+updateDate <- format(file.info("file path")$mtime, "%Y-%m-%d")
 
 # Import shapefiles data
 
