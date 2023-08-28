@@ -10,6 +10,8 @@ library(markdown)
 library(leaflet.extras)
 library(mapview)
 
+updateDate <- format(file.info("App_monitoring.R")$mtime, "%d-%m-%Y")
+
 
 # Import shapefiles data
 
@@ -116,10 +118,14 @@ sidebar <- dashboardSidebar(
                          newtab = T)),
     
     menuItem(paste0("Last update",": ",
-                    format(file.info("App_monitoring.R")$mtime, "%d-%m-%Y")))
-    )
+                    tryCatch(
+                      format(file.info("App_monitoring.R")$mtime, "%d-%m-%Y"),
+                      error = function (e) {
+                        "Error retrieving upadate time"
+                      }
+                    )))
   )
-  
+)   
 
 
 
