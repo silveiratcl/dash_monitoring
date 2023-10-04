@@ -11,7 +11,7 @@ library(leaflet.extras)
 library(mapview)
 library(lubridate)
 
-updateDate <- format(file.info("App_monitoring.R")$mtime, "%d-%m-%Y")
+#updateDate <- format(file.info("App_monitoring.R")$mtime, "%d-%m-%Y")
 
 
 # Import shapefiles data
@@ -78,56 +78,40 @@ ntrans_mrg_local_shp <- dafor_shp %>%
   st_as_sf(sf_column_name = "geometry.y")
 
 # Days Elapsed since last management
-########################
-########################
 
-#get system date
-# calculate elapsed days bsed on this
+hoje<- as.Date("2023-10-03")
 
-days_after_mng_mrg_local_shp <- manejo_shp %>%
-  data.frame() %>%
-  merge(., local_shp, by = "localidade", all.x = TRUE) %>%
-  filter(!st_is_empty(geometry.y)) %>%
-  group_by(localidade) %>%
-  mutate(max_data = max(data)) %>% 
-  mutate(days_since_last_record = as.numeric(max_data - data)) %>%
-  select(-c(geometry.x)) %>% 
-  st_as_sf(sf_column_name = "geometry.y") %>% 
-  print(width=Inf)
-
-
-
-
-
-
-#######  
+  # Calculate the maximum date for each locality in manejo_shp
+  max_dates <- manejo_shp %>%
+    group_by(localidade) %>%
+    summarize(max_data = max(data))
   
-# Calculate the maximum date for each locality in manejo_shp
-max_dates <- manejo_shp %>%
-  group_by(localidade) %>%
-  summarize(max_date = max(data))
-
-days_after_mng_mrg_local_shp <- manejo_shp %>%
-  st_join(local_shp) %>%
-  left_join(max_dates, by = c("localidade" = "localidade")) %>%
-  mutate(days_since_last_record = as.numeric(max_data - data)) %>%
-  select(-c(max_data, geometry.x))%>%
-  st_as_sf(sf_column_name = "geometry")
-
+  # Merge manejo_shp with local_shp based on the "localidade" field
+  merged_data <- manejo_shp %>%
+    data.frame() %>%
+    merge(., local_shp, by = "localidade", all.x = TRUE) %>%
+    filter(!st_is_empty(geometry.y)) %>%
+    select(localidade, data, geometry.x)
+  
+  # Join merged_data with max_dates to get the maximum date for each locality
+  result_data <- merged_data %>%
+    left_join(max_dates, by = "localidade") %>%
+    mutate(days_since_last_record = as.numeric(hoje - max_data))
+  
+  # Filter only records where the date matches the maximum date for each locality
+  result_data <- result_data %>%
+    filter(data == max_data)
+  
+  # Convert the result_data to an sf object
+  days_after_mng_mrg_local_shp <- st_as_sf(result_data, sf_column_name = "geometry.x")
+  
+  a<-as.Date("2022-11-18") 
+  b<-as.Date("2023-03-09")
+  
+  a-hoje
 
   
-# Merge manejo_shp with local_shp using st_join
-days_after_mng_mrg_local_shp <- manejo_shp %>%
-  st_join(local_shp) %>%
-  filter(!st_is_empty(geometry)) %>%
-  left_join(max_dates, by = c("localidade" = "localidade")) %>%
-  mutate(days_since_last_record = as.numeric(max_date - data)) %>%
-  select(-c(max_date, geometry.x)) %>%
-  st_as_sf(sf_column_name = "geometry")  
-
-
   
-#############################  
 #############################  
 
 
