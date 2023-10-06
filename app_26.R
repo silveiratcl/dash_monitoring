@@ -10,7 +10,6 @@ library(markdown)
 library(leaflet.extras)
 library(mapview)
 library(lubridate)
-library(git2r)
 
 #updateDate <- format(file.info("App_monitoring.R")$mtime, "%d-%m-%Y")
 
@@ -33,7 +32,7 @@ manejo_shp <- st_read("shp/manejo_cs.shp")
 
 # Create indicators layers
 
-## N transects with sun coral
+# N transects with sun coral
 
 dafor_mrg_local_shp <- dafor_shp %>%
   data.frame() %>%
@@ -45,7 +44,7 @@ dafor_mrg_local_shp <- dafor_shp %>%
   st_as_sf(sf_column_name = "geometry.y")
 
 
-## IAH localities
+# IAH localities
 
 geo_mrg_local_shp <- geo_shp %>%
   data.frame() %>%
@@ -56,7 +55,7 @@ geo_mrg_local_shp <- geo_shp %>%
   select(-c(geometry.x)) %>% 
   st_as_sf(sf_column_name = "geometry.y")
 
-## Monitoring Effort transects - positives by 1000 meters 
+# Monitoring Effort transects - positives by 1000 meters 
 
 effort_mrg_local_shp <- dafor_shp %>% 
   data.frame() %>% 
@@ -67,7 +66,7 @@ effort_mrg_local_shp <- dafor_shp %>%
   select(-c(geometry.x)) %>% 
   st_as_sf(sf_column_name = "geometry.y")
 
-## Number of transects by locality
+# Number of transects by locality
 
 ntrans_mrg_local_shp <- dafor_shp %>%
   data.frame() %>%
@@ -78,63 +77,66 @@ ntrans_mrg_local_shp <- dafor_shp %>%
   select(-c(geometry.x)) %>% 
   st_as_sf(sf_column_name = "geometry.y")
 
-## Days since last management
+# Days since last management
 
 today<-Sys.Date()
 
-  # Calculate the maximum date for each locality in manejo_shp
-  max_dates <- manejo_shp %>%
-    group_by(localidade) %>%
-    summarize(max_data = max(data))
-  
-  # Merge manejo_shp with local_shp based on the "localidade" field
-  merged_data <- manejo_shp %>%
-    data.frame() %>%
-    merge(., local_shp, by = "localidade", all.x = TRUE) %>%
-    filter(!st_is_empty(geometry.y)) %>%
-    select(localidade, data, n_colonias, geometry.x, geometry.y)  ### add more variables
-  
-  # Join merged_data with max_dates to get the maximum date for each locality
-  result_data <- merged_data %>%
-    left_join(max_dates, by = "localidade") %>%
-    mutate(days_since_last_record = as.numeric(today - max_data))
-  
-  # Filter only records where the date matches the maximum date for each locality
- # result_data <- result_data %>%
-  #15  filter(data == max_data)
-  
-  # Convert the result_data to an sf object
-  days_after_mng_mrg_local <- st_as_sf(result_data, sf_column_name = "geometry.y")
+# Calculate the maximum date for each locality in manejo_shp
+max_dates <- manejo_shp %>%
+  group_by(localidade) %>%
+  summarize(max_data = max(data))
 
-## Days since last check
+# Merge manejo_shp with local_shp based on the "localidade" field
+merged_data <- manejo_shp %>%
+  data.frame() %>%
+  merge(., local_shp, by = "localidade", all.x = TRUE) %>%
+  filter(!st_is_empty(geometry.y)) %>%
+  select(localidade, data, n_colonias, geometry.x, geometry.y)  ### add more variables
 
-  # Calculate the maximum date for each locality in dafor_shp
-  max_dates <- dafor_shp %>%
-    group_by(localidade) %>%
-    summarize(max_data = max(data))
-  
-  # Merge manejo_shp with local_shp based on the "localidade" field
-  merged_data <- dafor_shp %>%
-    data.frame() %>%
-    merge(., local_shp, by = "localidade", all.x = TRUE) %>%
-    filter(!st_is_empty(geometry.y)) %>%
-    select(localidade, data, geometry.x, geometry.y)  ### add more variables
-  
-  # Join merged_data with max_dates to get the maximum date for each locality
-  result_data <- merged_data %>%
-    left_join(max_dates, by = "localidade") %>%
-    mutate(days_since_last_check = as.numeric(today - max_data))
-  
-  # Filter only records where the date matches the maximum date for each locality
-  # result_data <- result_data %>%
-  #15  filter(data == max_data)
-  
-  # Convert the result_data to an sf object
-  days_since_check_mrg_local <- st_as_sf(result_data, sf_column_name = "geometry.y")
-  
-## Package version
-  
- 
+# Join merged_data with max_dates to get the maximum date for each locality
+result_data <- merged_data %>%
+  left_join(max_dates, by = "localidade") %>%
+  mutate(days_since_last_record = as.numeric(today - max_data))
+
+# Filter only records where the date matches the maximum date for each locality
+# result_data <- result_data %>%
+#15  filter(data == max_data)
+
+# Convert the result_data to an sf object
+days_after_mng_mrg_local <- st_as_sf(result_data, sf_column_name = "geometry.y")
+
+# Days since last check
+
+# Calculate the maximum date for each locality in dafor_shp
+max_dates <- dafor_shp %>%
+  group_by(localidade) %>%
+  summarize(max_data = max(data))
+
+# Merge manejo_shp with local_shp based on the "localidade" field
+merged_data <- dafor_shp %>%
+  data.frame() %>%
+  merge(., local_shp, by = "localidade", all.x = TRUE) %>%
+  filter(!st_is_empty(geometry.y)) %>%
+  select(localidade, data, geometry.x, geometry.y)  ### add more variables
+
+# Join merged_data with max_dates to get the maximum date for each locality
+result_data <- merged_data %>%
+  left_join(max_dates, by = "localidade") %>%
+  mutate(days_since_last_check = as.numeric(today - max_data))
+
+# Filter only records where the date matches the maximum date for each locality
+# result_data <- result_data %>%
+#15  filter(data == max_data)
+
+# Convert the result_data to an sf object
+days_since_check_mrg_local <- st_as_sf(result_data, sf_column_name = "geometry.y")
+
+
+
+# Mass managed
+
+
+
 # Sidebar Menu
 
 sidebar <- dashboardSidebar(
@@ -178,8 +180,7 @@ sidebar <- dashboardSidebar(
                          href = "https://dent-packet-5b9.notion.site/PACS-Monitoring-Dashboard-09d8969b1ff14e3ab8bd1f73de6a0906?pvs=4",
                          newtab = T)),
     
-    menuItem(paste0("version: ", "loren", "<br>",
-                    "data update: ", "loren"))
+    menuItem(paste0("Last update: ", today))
   )
 )   
 
@@ -187,7 +188,6 @@ sidebar <- dashboardSidebar(
 
 body <- dashboardBody(
   
-  tags$style(type = "text/css", "#map {height: calc(100vh - 200px) !important;}"),
   
   
   fluidRow(
@@ -208,13 +208,15 @@ body <- dashboardBody(
 
 
 # Put them together into a dashboardPage
-
 ui <- dashboardPage(
+  #tags$head(
+   # tags$link(rel = "stylesheet", type = "text/css", href = "css/styles.css")
+  #),
+ # includeCSS("css/styles.css"),
   skin = "yellow",
   dashboardHeader(title = "Sun Coral Monitoring"),
   sidebar,
-  body,
-  today
+  body
 )
 
 
@@ -240,7 +242,7 @@ server <- function(input, output, session) {
     filtered_ntrans_mrg_local <- ntrans_mrg_local_shp[ntrans_mrg_local_shp$data >= input$daterange[1] & ntrans_mrg_local_shp$data <= input$daterange[2], ]
     
     filtered_days_after_mng_mrg_local <- days_after_mng_mrg_local[days_after_mng_mrg_local$data >= input$daterange[1] & days_after_mng_mrg_local$data <= input$daterange[2], ]
-   
+    
     filtered_days_since_check_mrg_local <- days_since_check_mrg_local[days_since_check_mrg_local$data >= input$daterange[1] & days_since_check_mrg_local$data <= input$daterange[2], ]
     
     filtered_pacs <- pacs_shp
@@ -339,7 +341,7 @@ server <- function(input, output, session) {
     leaflet() %>%
       addProviderTiles("Esri.WorldImagery") %>% 
       setView(-48.38, -27.28, zoom = 12) 
-      
+    
   })
   
   observe({
