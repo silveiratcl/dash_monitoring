@@ -559,7 +559,8 @@ server <- function(input, output, session) {
           color = ~pal_last_mng(days_since_last_record),
           weight = 10,
           popup = ~paste0("<strong>Localidade:  <strong>", localidade, "<br>",
-                          "<strong>Days since last management: </strong> ", days_since_last_record),
+                          "<strong>Days since last management:  </strong> ", days_since_last_record, "<br>",
+                          "<strong>Date of last management:  </strong> ", max_data),
           labelOptions = labelOptions(noHide = FALSE, direction = "right")
         )%>%
         addLegend(
@@ -583,7 +584,8 @@ server <- function(input, output, session) {
           color = ~pal_last_check(days_since_last_check),
           weight = 10,
           popup = ~paste0("<strong>Localidade:  <strong>", localidade, "<br>",
-                          "<strong>Days since last management: </strong> ", days_since_last_check),
+                          "<strong>Days since last check:  </strong> ", days_since_last_check, "<br>",
+                          "<strong>Date of last check:  <strong>", max_data),
           labelOptions = labelOptions(noHide = FALSE, direction = "right")
         )%>%
         addLegend(
