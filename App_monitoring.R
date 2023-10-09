@@ -178,16 +178,13 @@ sidebar <- dashboardSidebar(
                          href = "https://dent-packet-5b9.notion.site/PACS-Monitoring-Dashboard-09d8969b1ff14e3ab8bd1f73de6a0906?pvs=4",
                          newtab = T)),
     
-    menuItem(paste0("version: ", "loren", "<br>",
-                    "data update: ", "loren"))
+    menuItem(paste0("version: ", "loren"))
   )
 )   
 
 
 
 body <- dashboardBody(
-  
-  tags$style(type = "text/css", "#map {height: calc(100vh - 200px) !important;}"),
   
   
   fluidRow(
@@ -199,9 +196,11 @@ body <- dashboardBody(
   ),
   
   fluidRow(
+    includeCSS("css/styles.css"),
     box(leafletOutput("map"),
         width = "100%",
-        height = "100%"
+        height = "100vh"  # Set the height to 100vh
+        
     )
   )
 )
@@ -213,8 +212,7 @@ ui <- dashboardPage(
   skin = "yellow",
   dashboardHeader(title = "Sun Coral Monitoring"),
   sidebar,
-  body,
-  today
+  body
 )
 
 
