@@ -9,6 +9,10 @@ library(dplyr)
 library(markdown)
 library(leaflet.extras)
 library(mapview)
+library(lubridate)
+library(git2r)
+
+#updateDate <- format(file.info("App_monitoring.R")$mtime, "%d-%m-%Y")
 
 
 # Import shapefiles data
@@ -25,9 +29,25 @@ rebio_shp <- st_read("shp/limite_rebio.shp")
 
 occ_shp <- st_read("shp/manchas_cs.shp")
 
+manejo_shp <- st_read("shp/manejo_cs.shp")
+
+# Repository version
+## Define the path to your Git repository
+repo_path <- "C:/Users/silve/OneDrive/Documentos/Academico/POS-DOC_UFSC/@Karon Coral Sol/dash_monitoring/dash_monitoring"  # Replace with the path to your Git repository
+
+# Use system2 to run a Git command to get the commit SHA of the latest commit on "HEAD"
+commit_sha <- trimws(system2("git", c("rev-parse", "HEAD"), stdout = TRUE, stderr = TRUE))
+commit_sha <- as.character(commit_sha)
+commit_sha <-substr(commit_sha, 1, 8)
+
+# Use another Git command to get the commit date
+commit_date <- trimws(system2("git", c("log", "-1", "--format=%ci", "HEAD"), stdout = TRUE, stderr = TRUE))
+commit_date <- as.character(commit_date)
+commit_date <-substr(commit_date, 1, 10)
+
 # Create indicators layers
 
-# N transects with sun coral
+## N transects with sun coral
 
 dafor_mrg_local_shp <- dafor_shp %>%
   data.frame() %>%
@@ -39,7 +59,7 @@ dafor_mrg_local_shp <- dafor_shp %>%
   st_as_sf(sf_column_name = "geometry.y")
 
 
-# IAH localities
+## IAH localities
 
 geo_mrg_local_shp <- geo_shp %>%
   data.frame() %>%
@@ -50,7 +70,7 @@ geo_mrg_local_shp <- geo_shp %>%
   select(-c(geometry.x)) %>% 
   st_as_sf(sf_column_name = "geometry.y")
 
-# Monitoring Effort transects - positives by 1000 meters 
+## Monitoring Effort transects - positives by 1000 meters 
 
 effort_mrg_local_shp <- dafor_shp %>% 
   data.frame() %>% 
@@ -61,7 +81,7 @@ effort_mrg_local_shp <- dafor_shp %>%
   select(-c(geometry.x)) %>% 
   st_as_sf(sf_column_name = "geometry.y")
 
-# Number of transects by locality
+## Number of transects by locality
 
 ntrans_mrg_local_shp <- dafor_shp %>%
   data.frame() %>%
@@ -72,12 +92,63 @@ ntrans_mrg_local_shp <- dafor_shp %>%
   select(-c(geometry.x)) %>% 
   st_as_sf(sf_column_name = "geometry.y")
 
-# Days Elapsed since last management
+## Days since last management
 
-# Mass managed
+today<-Sys.Date()
 
+  # Calculate the maximum date for each locality in manejo_shp
+  max_dates <- manejo_shp %>%
+    group_by(localidade) %>%
+    summarize(max_data = max(data))
+  
+  # Merge manejo_shp with local_shp based on the "localidade" field
+  merged_data <- manejo_shp %>%
+    data.frame() %>%
+    merge(., local_shp, by = "localidade", all.x = TRUE) %>%
+    filter(!st_is_empty(geometry.y)) %>%
+    select(localidade, data, n_colonias, geometry.x, geometry.y)  ### add more variables
+  
+  # Join merged_data with max_dates to get the maximum date for each locality
+  result_data <- merged_data %>%
+    left_join(max_dates, by = "localidade") %>%
+    mutate(days_since_last_record = as.numeric(today - max_data))
+  
+  # Filter only records where the date matches the maximum date for each locality
+ # result_data <- result_data %>%
+  #15  filter(data == max_data)
+  
+  # Convert the result_data to an sf object
+  days_after_mng_mrg_local <- st_as_sf(result_data, sf_column_name = "geometry.y")
 
+## Days since last check
 
+  # Calculate the maximum date for each locality in dafor_shp
+  max_dates <- dafor_shp %>%
+    group_by(localidade) %>%
+    summarize(max_data = max(data))
+  
+  # Merge manejo_shp with local_shp based on the "localidade" field
+  merged_data <- dafor_shp %>%
+    data.frame() %>%
+    merge(., local_shp, by = "localidade", all.x = TRUE) %>%
+    filter(!st_is_empty(geometry.y)) %>%
+    select(localidade, data, geometry.x, geometry.y)  ### add more variables
+  
+  # Join merged_data with max_dates to get the maximum date for each locality
+  result_data <- merged_data %>%
+    left_join(max_dates, by = "localidade") %>%
+    mutate(days_since_last_check = as.numeric(today - max_data))
+  
+  # Filter only records where the date matches the maximum date for each locality
+  # result_data <- result_data %>%
+  #15  filter(data == max_data)
+  
+  # Convert the result_data to an sf object
+  days_since_check_mrg_local <- st_as_sf(result_data, sf_column_name = "geometry.y")
+  
+
+  
+ 
 # Sidebar Menu
 
 sidebar <- dashboardSidebar(
@@ -97,14 +168,20 @@ sidebar <- dashboardSidebar(
                choices = c("Transects with Sun Coral(TWSC)", 
                            "Habitat Suitability Index(HSI)",
                            "TWSC/1000m",
-                           "N. of Transects by Locality(NTL)"),
+                           "N. of Transects by Locality(NTL)",
+                           "Days since last management(DSLManag)",
+                           "Days since last check(DSLCheck)"),
                selected = c("Transects with Sun Coral(TWSC)")
              ),
              
              checkboxGroupInput(
                "layers",
                label = "Data:",
-               choices = c("Occurrence", "Dafor", "Geomorphology", "Target Locations", "Locality", "REBIO Limits" ),
+               choices = c("Occurrence", 
+                           "Dafor", "Geomorphology", 
+                           "Target Locations", 
+                           "Locality", 
+                           "REBIO Limits" ),
                selected = c("Occurrence")
              )),
     
@@ -113,15 +190,27 @@ sidebar <- dashboardSidebar(
              icon = icon("file-text"),
              menuSubItem(text = "About the Dashboard", 
                          href = "https://dent-packet-5b9.notion.site/PACS-Monitoring-Dashboard-09d8969b1ff14e3ab8bd1f73de6a0906?pvs=4",
+<<<<<<< HEAD
                          newtab = T))
+=======
+                         newtab = T)),
+    
+    
+    div(
+      class = "sidebar-footer",
+      p(
+        style = "font-size: 12px; text-align: left; margin-left: 5px ",
+        HTML(paste0("update: ", commit_date, "<br>",
+                    "version: [", commit_sha, "]"))
+      )
+>>>>>>> development
     )
   )
-  
+)   
 
 
 
 body <- dashboardBody(
-  tags$style(type = "text/css", "#map {height: calc(100vh - 200px) !important;}"),
   
   
   fluidRow(
@@ -133,9 +222,11 @@ body <- dashboardBody(
   ),
   
   fluidRow(
+    includeCSS("css/styles.css"),
     box(leafletOutput("map"),
         width = "100%",
-        height = "100%"
+        height = "100vh"  # Set the height to 100vh
+        
     )
   )
 )
@@ -172,12 +263,17 @@ server <- function(input, output, session) {
     
     filtered_ntrans_mrg_local <- ntrans_mrg_local_shp[ntrans_mrg_local_shp$data >= input$daterange[1] & ntrans_mrg_local_shp$data <= input$daterange[2], ]
     
+    filtered_days_after_mng_mrg_local <- days_after_mng_mrg_local[days_after_mng_mrg_local$data >= input$daterange[1] & days_after_mng_mrg_local$data <= input$daterange[2], ]
+   
+    filtered_days_since_check_mrg_local <- days_since_check_mrg_local[days_since_check_mrg_local$data >= input$daterange[1] & days_since_check_mrg_local$data <= input$daterange[2], ]
+    
     filtered_pacs <- pacs_shp
     
     filtered_local <- local_shp
     
     filtered_rebio <- rebio_shp
     
+    days_since_check_mrg_local
     
     #boxesdata
     
@@ -217,6 +313,8 @@ server <- function(input, output, session) {
       filtered_geo_mrg_local = filtered_geo_mrg_local,
       filtered_effort_mrg_local = filtered_effort_mrg_local,
       filtered_ntrans_mrg_local = filtered_ntrans_mrg_local,
+      filtered_days_after_mng_mrg_local = filtered_days_after_mng_mrg_local,
+      filtered_days_since_check_mrg_local = filtered_days_since_check_mrg_local,
       
       # Return boxes data
       n_location = n_location, #MAKE IT REACTIVE TO DATE
@@ -465,6 +563,59 @@ server <- function(input, output, session) {
           title = ~paste0("NTL")
         )
     }
+    
+    if ("Days since last management(DSLManag)" %in% input$indicators && nrow(reactiveData()$filtered_days_after_mng_mrg_local) > 0) {
+      
+      pal_last_mng <- colorNumeric(
+        palette = rev(c("#BE2A3E","#CD4242","#E76B49","#F7B059","#F5CA63","#EACF65","#D6CA64","#5DA25F","#449559","#22763F")),
+        domain = reactiveData()$filtered_days_after_mng_mrg_local$days_since_last_record
+      )
+      
+      leafletProxy("map", data = reactiveData()$filtered_days_after_mng_mrg_local) %>%
+        addPolylines(
+          fillColor = ~pal_last_mng(days_since_last_record),
+          color = ~pal_last_mng(days_since_last_record),
+          weight = 10,
+          popup = ~paste0("<strong>Localidade:  <strong>", localidade, "<br>",
+                          "<strong>Days since last management:  </strong> ", days_since_last_record, "<br>",
+                          "<strong>Date of last management:  </strong> ", max_data),
+          labelOptions = labelOptions(noHide = FALSE, direction = "right")
+        )%>%
+        addLegend(
+          pal = pal_last_mng,
+          values = reactiveData()$filtered_days_after_mng_mrg_loca$days_since_last_record,
+          position = "bottomright",
+          title = ~paste0("DSLManag")
+        )
+    }
+    
+    if ("Days since last check(DSLCheck)" %in% input$indicators && nrow(reactiveData()$ filtered_days_since_check_mrg_local) > 0) {
+      
+      pal_last_check <- colorNumeric(
+        palette = rev(c("#BE2A3E","#CD4242","#E76B49","#F7B059","#F5CA63","#EACF65","#D6CA64","#5DA25F","#449559","#22763F")),
+        domain = reactiveData()$ filtered_days_since_check_mrg_local$days_since_last_check
+      )
+      
+      leafletProxy("map", data = reactiveData()$ filtered_days_since_check_mrg_local) %>%
+        addPolylines(
+          fillColor = ~pal_last_check(days_since_last_check),
+          color = ~pal_last_check(days_since_last_check),
+          weight = 10,
+          popup = ~paste0("<strong>Localidade:  <strong>", localidade, "<br>",
+                          "<strong>Days since last check:  </strong> ", days_since_last_check, "<br>",
+                          "<strong>Date of last check:  <strong>", max_data),
+          labelOptions = labelOptions(noHide = FALSE, direction = "right")
+        )%>%
+        addLegend(
+          pal = pal_last_check,
+          values = reactiveData()$filtered_days_since_check_mrg_local$days_since_last_check,
+          position = "bottomright",
+          title = ~paste0("DSLCheck")
+        )
+    }
+    
+    
+    
     
   })
 }

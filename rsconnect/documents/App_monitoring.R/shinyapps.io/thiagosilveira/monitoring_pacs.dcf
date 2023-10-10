@@ -5,10 +5,17 @@ account: thiagosilveira
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 8760931
+<<<<<<< HEAD
 bundleId: 7618319
 url: https://thiagosilveira.shinyapps.io/monitoring_pacs/
 when: 1693256774.75546
 lastSyncTime: 1693256774.75547
+=======
+bundleId: 7618292
+url: https://thiagosilveira.shinyapps.io/monitoring_pacs/
+when: 1693256008.57042
+lastSyncTime: 1693256008.57043
+>>>>>>> development
 asMultiple: FALSE
 asStatic: FALSE
 ignoredFiles: app_25.R|img/logo.png|README.md
