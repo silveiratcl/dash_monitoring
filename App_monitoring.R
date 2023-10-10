@@ -31,6 +31,20 @@ occ_shp <- st_read("shp/manchas_cs.shp")
 
 manejo_shp <- st_read("shp/manejo_cs.shp")
 
+# Repository version
+## Define the path to your Git repository
+repo_path <- "C:/Users/silve/OneDrive/Documentos/Academico/POS-DOC_UFSC/@Karon Coral Sol/dash_monitoring/dash_monitoring"  # Replace with the path to your Git repository
+
+# Use system2 to run a Git command to get the commit SHA of the latest commit on "HEAD"
+commit_sha <- trimws(system2("git", c("rev-parse", "HEAD"), stdout = TRUE, stderr = TRUE))
+commit_sha <- as.character(commit_sha)
+commit_sha <-substr(commit_sha, 1, 8)
+
+# Use another Git command to get the commit date
+commit_date <- trimws(system2("git", c("log", "-1", "--format=%ci", "HEAD"), stdout = TRUE, stderr = TRUE))
+commit_date <- as.character(commit_date)
+commit_date <-substr(commit_date, 1, 10)
+
 # Create indicators layers
 
 ## N transects with sun coral
@@ -132,7 +146,7 @@ today<-Sys.Date()
   # Convert the result_data to an sf object
   days_since_check_mrg_local <- st_as_sf(result_data, sf_column_name = "geometry.y")
   
-## Package version
+
   
  
 # Sidebar Menu
@@ -178,7 +192,15 @@ sidebar <- dashboardSidebar(
                          href = "https://dent-packet-5b9.notion.site/PACS-Monitoring-Dashboard-09d8969b1ff14e3ab8bd1f73de6a0906?pvs=4",
                          newtab = T)),
     
-    menuItem(paste0("version: ", "loren"))
+    
+    div(
+      class = "sidebar-footer",
+      p(
+        style = "font-size: 12px; text-align: left; margin-left: 5px ",
+        HTML(paste0("update: ", commit_date, "<br>",
+                    "version: [", commit_sha, "]"))
+      )
+    )
   )
 )   
 
