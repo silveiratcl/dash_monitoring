@@ -5,10 +5,9 @@ account: thiagosilveira
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 8757822
-bundleId: 7047776
+bundleId: 7785738
 url: https://thiagosilveira.shinyapps.io/dash_monitoring/
-when: 1680613928.5977
-lastSyncTime: 1680613928.59771
+when: 1696945532.81654
+lastSyncTime: 1696945532.81655
 asMultiple: FALSE
 asStatic: FALSE
-ignoredFiles: app.R|App2.R|App3.R|app4.R|app5.R|sun_coral_monitoring.R
