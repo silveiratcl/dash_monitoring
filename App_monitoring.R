@@ -31,9 +31,15 @@ occ_shp <- st_read("shp/manchas_cs.shp")
 
 manejo_shp <- st_read("shp/manejo_cs.shp")
 
+invasion_pts_shp <- st_read("shp/pts_invasao.shp")
+
 # Repository version
 
 source("version_info.R")
+
+# get url for pictures
+
+source("getPictureURL.R")
 
 # Create indicators layers
 
@@ -86,19 +92,19 @@ ntrans_mrg_local_shp <- dafor_shp %>%
 
 today<-Sys.Date()
 
-  # Calculate the maximum date for each locality in manejo_shp
+  ### Calculate the maximum date for each locality in manejo_shp
   max_dates <- manejo_shp %>%
     group_by(localidade) %>%
     summarize(max_data = max(data))
   
-  # Merge manejo_shp with local_shp based on the "localidade" field
+  ### Merge manejo_shp with local_shp based on the "localidade" field
   merged_data <- manejo_shp %>%
     data.frame() %>%
     merge(., local_shp, by = "localidade", all.x = TRUE) %>%
     filter(!st_is_empty(geometry.y)) %>%
     select(localidade, data, n_colonias, geometry.x, geometry.y)  ### add more variables
   
-  # Join merged_data with max_dates to get the maximum date for each locality
+  ### Join merged_data with max_dates to get the maximum date for each locality
   result_data <- merged_data %>%
     left_join(max_dates, by = "localidade") %>%
     mutate(days_since_last_record = as.numeric(today - max_data))
@@ -107,24 +113,24 @@ today<-Sys.Date()
  # result_data <- result_data %>%
   #15  filter(data == max_data)
   
-  # Convert the result_data to an sf object
+  ### Convert the result_data to an sf object
   days_after_mng_mrg_local <- st_as_sf(result_data, sf_column_name = "geometry.y")
 
 ## Days since last check
 
-  # Calculate the maximum date for each locality in dafor_shp
+  ### Calculate the maximum date for each locality in dafor_shp
   max_dates <- dafor_shp %>%
     group_by(localidade) %>%
     summarize(max_data = max(data))
   
-  # Merge manejo_shp with local_shp based on the "localidade" field
+  ### Merge manejo_shp with local_shp based on the "localidade" field
   merged_data <- dafor_shp %>%
     data.frame() %>%
     merge(., local_shp, by = "localidade", all.x = TRUE) %>%
     filter(!st_is_empty(geometry.y)) %>%
     select(localidade, data, geometry.x, geometry.y)  ### add more variables
   
-  # Join merged_data with max_dates to get the maximum date for each locality
+  ### Join merged_data with max_dates to get the maximum date for each locality
   result_data <- merged_data %>%
     left_join(max_dates, by = "localidade") %>%
     mutate(days_since_last_check = as.numeric(today - max_data))
@@ -133,7 +139,7 @@ today<-Sys.Date()
   # result_data <- result_data %>%
   #15  filter(data == max_data)
   
-  # Convert the result_data to an sf object
+  ### Convert the result_data to an sf object
   days_since_check_mrg_local <- st_as_sf(result_data, sf_column_name = "geometry.y")
   
 
@@ -239,7 +245,7 @@ server <- function(input, output, session) {
     
     filtered_geo <- geo_shp[geo_shp$data >= input$daterange[1] & geo_shp$data <= input$daterange[2], ]
     
-    filtered_occ <- occ_shp[occ_shp$data >= input$daterange[1] & occ_shp$data <= input$daterange[2], ]
+    filtered_occ <- invasion_pts_shp[invasion_pts_shp$data >= input$daterange[1] & invasion_pts_shp$data <= input$daterange[2], ]
     
     filtered_dafor_mrg_local <- dafor_mrg_local_shp[dafor_mrg_local_shp$data >= input$daterange[1] & dafor_mrg_local_shp$data <= input$daterange[2], ]
     
@@ -252,14 +258,13 @@ server <- function(input, output, session) {
     filtered_days_after_mng_mrg_local <- days_after_mng_mrg_local[days_after_mng_mrg_local$data >= input$daterange[1] & days_after_mng_mrg_local$data <= input$daterange[2], ]
    
     filtered_days_since_check_mrg_local <- days_since_check_mrg_local[days_since_check_mrg_local$data >= input$daterange[1] & days_since_check_mrg_local$data <= input$daterange[2], ]
-    
+
     filtered_pacs <- pacs_shp
     
     filtered_local <- local_shp
     
     filtered_rebio <- rebio_shp
     
-    days_since_check_mrg_local
     
     #boxesdata
     
@@ -433,8 +438,9 @@ server <- function(input, output, session) {
           color = "red",
           weight = 8,
           popup = ~paste0("<strong>Locality: </strong> ", localidade, "<br>",
-                          "<strong>Date found: </strong> ", data),
-          labelOptions = labelOptions(noHide = FALSE, direction = "right") #add pulse marker see chatgpt
+                          "<strong>Date found: </strong> ", data, "<br>",
+                          "<strong>Picture: </strong> <a href='", getPictureURL(jpg_path), "' target='_new'>View Picture</a>" ),
+          labelOptions = labelOptions(noHide = FALSE, direction = "right") 
         )
     }
     
