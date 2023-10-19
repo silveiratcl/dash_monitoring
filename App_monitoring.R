@@ -37,9 +37,9 @@ invasion_pts_shp <- st_read("shp/pts_invasao.shp")
 
 source("version_info.R")
 
-# get url for pictures
+#get url for pictures
 
-source("getPictureURL.R")
+#source("getPictureURL.R")
 
 # Create indicators layers
 
@@ -150,6 +150,12 @@ today<-Sys.Date()
 sidebar <- dashboardSidebar(
   
   sidebarMenu(
+    HTML(paste0(
+      "<br>",
+      "<a><img style = 'display: block; margin-left: auto; margin-right: auto;' src='logo.png' width = '186'></a>",
+      "<br>"
+    )),
+    
     menuItem("Monitoring Map", tabname = "map", icon = icon("map"),
              dateRangeInput(
                "daterange", "Select date range: ",
@@ -439,10 +445,18 @@ server <- function(input, output, session) {
           weight = 8,
           popup = ~paste0("<strong>Locality: </strong> ", localidade, "<br>",
                           "<strong>Date found: </strong> ", data, "<br>",
-                          "<strong>Picture: </strong> <a href='", getPictureURL(jpg_path), "' target='_new'>View Picture</a>" ),
+                          "<a><img style = 'display: block; margin-left: auto; margin-right: auto;' src='img/pts_invasao/", jpg_path,"' width = '250'></a>",
+                          "<br>" ),
           labelOptions = labelOptions(noHide = FALSE, direction = "right") 
         )
     }
+    
+  #  "<br>",
+   # "<a><img src='",logo.png,"></a>",
+    #"<br>"
+    
+    
+    
     
     if ("REBIO Limits" %in% input$layers && nrow(reactiveData()$filtered_rebio) > 0) {
       leafletProxy("map", data = reactiveData()$filtered_rebio) %>%
