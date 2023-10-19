@@ -37,10 +37,6 @@ invasion_pts_shp <- st_read("shp/pts_invasao.shp")
 
 source("version_info.R")
 
-#get url for pictures
-
-#source("getPictureURL.R")
-
 # Create indicators layers
 
 ## N transects with sun coral
@@ -110,8 +106,8 @@ today<-Sys.Date()
     mutate(days_since_last_record = as.numeric(today - max_data))
   
   # Filter only records where the date matches the maximum date for each locality
- # result_data <- result_data %>%
-  #15  filter(data == max_data)
+  # result_data <- result_data %>%
+  # filter(data == max_data)
   
   ### Convert the result_data to an sf object
   days_after_mng_mrg_local <- st_as_sf(result_data, sf_column_name = "geometry.y")
@@ -137,7 +133,7 @@ today<-Sys.Date()
   
   # Filter only records where the date matches the maximum date for each locality
   # result_data <- result_data %>%
-  #15  filter(data == max_data)
+  # filter(data == max_data)
   
   ### Convert the result_data to an sf object
   days_since_check_mrg_local <- st_as_sf(result_data, sf_column_name = "geometry.y")
@@ -152,7 +148,7 @@ sidebar <- dashboardSidebar(
   sidebarMenu(
     HTML(paste0(
       "<br>",
-      "<a><img style = 'display: block; margin-left: auto; margin-right: auto;' src='logo.png' width = '186'></a>",
+      "<a><img style = 'display: block; margin-left: auto; margin-right: auto;' src='img/jpg/logo.png' width = '186'></a>",
       "<br>"
     )),
     
@@ -445,19 +441,15 @@ server <- function(input, output, session) {
           weight = 8,
           popup = ~paste0("<strong>Locality: </strong> ", localidade, "<br>",
                           "<strong>Date found: </strong> ", data, "<br>",
-                          "<a><img style = 'display: block; margin-left: auto; margin-right: auto;' src='img/pts_invasao/", jpg_path,"' width = '250'></a>",
-                          "<br>" ),
+                          "<div style='display: flex; justify-content: space-between;'>",
+                          "<div><a href= img/pts_invasao/",jpg_path," target=_blank ><img style='display: block; margin-left: auto; margin-right: auto; padding: 2px;' src='img/pts_invasao/", jpg_path, "' width='130'></a></div>",
+                          "<br>",
+                          "<div><a href= img/pts_invasao/",jpg_path," target=_blank><img style='display: block; margin-left: auto; margin-right: auto; padding: 2px;' src='img/pts_invasao/", jpg_path, "' width='130'></a></div>",
+                          "</div>"),
           labelOptions = labelOptions(noHide = FALSE, direction = "right") 
         )
     }
-    
-  #  "<br>",
-   # "<a><img src='",logo.png,"></a>",
-    #"<br>"
-    
-    
-    
-    
+       
     if ("REBIO Limits" %in% input$layers && nrow(reactiveData()$filtered_rebio) > 0) {
       leafletProxy("map", data = reactiveData()$filtered_rebio) %>%
         addPolylines(
