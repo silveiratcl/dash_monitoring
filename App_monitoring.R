@@ -439,16 +439,31 @@ server <- function(input, output, session) {
           fillOpacity = 0.5,
           color = "red",
           weight = 8,
-          popup = ~paste0("<strong>Locality: </strong> ", localidade, "<br>",
-                          "<strong>Date found: </strong> ", data, "<br>",
-                          "<div style='display: flex; justify-content: space-between;'>",
-                          "<div><a href= img/pts_invasao/",jpg_path," target=_blank ><img style='display: block; margin-left: auto; margin-right: auto; padding: 2px;' src='img/pts_invasao/", jpg_path, "' width='130'></a></div>",
-                          "<br>",
-                          "<div><a href= img/pts_invasao/",jpg_path," target=_blank><img style='display: block; margin-left: auto; margin-right: auto; padding: 2px;' src='img/pts_invasao/", jpg_path, "' width='130'></a></div>",
-                          "</div>"),
+          popup = ~{
+            popup_content <- paste0("<strong>Locality: </strong> ", localidade, "<br>",
+                                    "<strong>Date found: </strong> ", data, "<br>",
+                                    "<a href= img/pts_invasao/", jpg_1, " target=_blank ><img style='display: block; margin-left: auto; margin-right: auto; padding: 2px;' src='img/pts_invasao/", jpg_1, "' width='130' height= '130'></a>")
+            
+            if (!is.na(jpg_2) && nzchar(jpg_2)) {
+              popup_content <- paste0(popup_content,
+                                      "<a href= img/pts_invasao/", jpg_2, " target=_blank>View JPG_2</a><br>")
+            }
+            
+            if (!is.na(jpg_3) && nzchar(jpg_3)) {
+              popup_content <- paste0(popup_content,
+                                      "<a href= img/pts_invasao/", jpg_3, " target=_blank>View JPG_3</a><br>")
+            }
+            
+            return(popup_content)
+          },
           labelOptions = labelOptions(noHide = FALSE, direction = "right") 
         )
     }
+    
+    
+    
+    
+    
        
     if ("REBIO Limits" %in% input$layers && nrow(reactiveData()$filtered_rebio) > 0) {
       leafletProxy("map", data = reactiveData()$filtered_rebio) %>%
