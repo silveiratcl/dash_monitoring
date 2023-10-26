@@ -230,7 +230,7 @@ body <- dashboardBody(
 
 ui <- dashboardPage(
   skin = "yellow",
-  dashboardHeader(title = "Sun Coral Monitoring"),
+  dashboardHeader(title = "Sun Coral Check"),
   sidebar,
   body
 )
@@ -432,6 +432,24 @@ server <- function(input, output, session) {
         )
     }
     
+    # if ("Occurrence" %in% input$layers && nrow(reactiveData()$filtered_occ) > 0) {
+    #   leafletProxy("map", data = reactiveData()$filtered_occ) %>%
+    #     addCircles(
+    #       fillColor = "red",
+    #       fillOpacity = 0.5,
+    #       color = "red",
+    #       weight = 8,
+    #       popup =  ~paste0(
+    #           "<strong>Locality: </strong> ", localidade, "<br>",
+    #           "<strong>Date found: </strong> ", data, "<br>",
+    #           "<div><a href='img/pts_invasao/", jpg_1, "' target='_blank'><img style='display: block; margin-left: auto; margin-right; auto;' src='img/pts_invasao/", jpg_1, "' width='100';></a></div>","<br",
+    #           "<div><a href='img/pts_invasao/", jpg_2, "' target='_blank'><img style='display: block; margin-left: auto; margin-right: auto;' src='img/pts_invasao/", jpg_2, "' width='100';></a></div>"
+    #           )
+    #     )
+    #       labelOptions = labelOptions(noHide = FALSE, direction = "right")
+    #     
+    # }
+    
     if ("Occurrence" %in% input$layers && nrow(reactiveData()$filtered_occ) > 0) {
       leafletProxy("map", data = reactiveData()$filtered_occ) %>%
         addCircles(
@@ -440,25 +458,34 @@ server <- function(input, output, session) {
           color = "red",
           weight = 8,
           popup = ~{
-            popup_content <- paste0("<strong>Locality: </strong> ", localidade, "<br>",
-                                    "<strong>Date found: </strong> ", data, "<br>",
-                                    "<a href= img/pts_invasao/", jpg_1, " target=_blank ><img style='display: block; margin-left: auto; margin-right: auto; padding: 2px;' src='img/pts_invasao/", jpg_1, "' width='130' height= '130'></a>")
+            popupContent <- paste0(
+              "<strong>Locality: </strong> ", localidade, "<br>",
+              "<strong>Date found: </strong> ", data, "<br>"
+            )
             
-            if (!is.na(jpg_2) && nzchar(jpg_2)) {
-              popup_content <- paste0(popup_content,
-                                      "<a href= img/pts_invasao/", jpg_2, " target=_blank>View JPG_2</a><br>")
+            # Check if any element in jpg_1 contains ".jpg" and, if so, add it to the popup
+            if (any(sapply(jpg_1, function(x) grepl(".jpg", ignore.case = TRUE, x)))) {
+              popupContent <- paste0(popupContent,
+                                     "<div><a href='img/pts_invasao/", jpg_1, "' target='_blank'><img style='display: block; margin-left: auto; margin-right: auto;' src='img/pts_invasao/", jpg_1, "' width='100';></a></div>"
+              )
             }
             
-            if (!is.na(jpg_3) && nzchar(jpg_3)) {
-              popup_content <- paste0(popup_content,
-                                      "<a href= img/pts_invasao/", jpg_3, " target=_blank>View JPG_3</a><br>")
+            # Check if any element in jpg_2 contains ".jpg" and, if so, add it to the popup
+            if (any(sapply(jpg_2, function(x) grepl(".jpg", ignore.case = TRUE, x)))) {
+              popupContent <- paste0(popupContent,
+                                     "<div><a href='img/pts_invasao/", jpg_2, "' target='_blank'><img style='display: block; margin-left: auto; margin-right: auto;' src='img/pts_invasao/", jpg_2, "' width='100';></a></div>"
+              )
             }
             
-            return(popup_content)
+            return(popupContent)
           },
-          labelOptions = labelOptions(noHide = FALSE, direction = "right") 
+          labelOptions = labelOptions(noHide = FALSE, direction = "right")
         )
     }
+    
+    
+    
+    
     
     
     
