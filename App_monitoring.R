@@ -31,7 +31,7 @@ occ_shp <- st_read("shp/manchas_cs.shp")
 
 manejo_shp <- st_read("shp/manejo_cs.shp")
 
-invasion_pts_shp <- st_read("shp/pts_invasao.shp")
+invasion_pts_shp <- st_read("shp/pts_invasao_nova.shp")
 
 # Repository version
 
@@ -432,6 +432,7 @@ server <- function(input, output, session) {
         )
     }
     
+    # first version 
     # if ("Occurrence" %in% input$layers && nrow(reactiveData()$filtered_occ) > 0) {
     #   leafletProxy("map", data = reactiveData()$filtered_occ) %>%
     #     addCircles(
@@ -450,6 +451,14 @@ server <- function(input, output, session) {
     #     
     # }
     
+    #### teste 2
+    
+    
+    
+    
+    
+    #### code works but past palce holder
+
     if ("Occurrence" %in% input$layers && nrow(reactiveData()$filtered_occ) > 0) {
       leafletProxy("map", data = reactiveData()$filtered_occ) %>%
         addCircles(
@@ -462,32 +471,28 @@ server <- function(input, output, session) {
               "<strong>Locality: </strong> ", localidade, "<br>",
               "<strong>Date found: </strong> ", data, "<br>"
             )
-            
+
             # Check if any element in jpg_1 contains ".jpg" and, if so, add it to the popup
             if (any(sapply(jpg_1, function(x) grepl(".jpg", ignore.case = TRUE, x)))) {
               popupContent <- paste0(popupContent,
-                                     "<div><a href='img/pts_invasao/", jpg_1, "' target='_blank'><img style='display: block; margin-left: auto; margin-right: auto;' src='img/pts_invasao/", jpg_1, "' width='100';></a></div>"
+                                     "<div><a href='img/pts_invasao/", jpg_1, "' target='_blank'><img style='display: block; margin-left: auto; margin-right: auto;' src='img/pts_invasao/", jpg_1, "' width='100'></a></div>"
+                                     ,
+                                     "<br>"
               )
             }
-            
+
             # Check if any element in jpg_2 contains ".jpg" and, if so, add it to the popup
             if (any(sapply(jpg_2, function(x) grepl(".jpg", ignore.case = TRUE, x)))) {
               popupContent <- paste0(popupContent,
                                      "<div><a href='img/pts_invasao/", jpg_2, "' target='_blank'><img style='display: block; margin-left: auto; margin-right: auto;' src='img/pts_invasao/", jpg_2, "' width='100';></a></div>"
               )
             }
-            
+
             return(popupContent)
           },
           labelOptions = labelOptions(noHide = FALSE, direction = "right")
         )
     }
-    
-    
-    
-    
-    
-    
     
     
     
