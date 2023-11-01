@@ -35,7 +35,7 @@ invasion_pts_shp <- st_read("shp/pts_invasao_nova.shp")
 
 # Repository version
 
-source("version_info.R")
+#source("version_info.R")
 
 # Create indicators layers
 
@@ -194,9 +194,11 @@ sidebar <- dashboardSidebar(
     div(
       class = "sidebar-footer",
       p(
-        style = "font-size: 12px; text-align: left; margin-left: 5px ",
-        HTML(paste0("update: ", commit_date, "<br>",
-                    "version: [", commit_sha, "]"))
+        style = "font-size: 12px; text-align: left; margin-left: 15px ",
+        HTML(paste0(
+          "Developed by ", "<a href='https://silveiratcl.github.io/site/'>Thiago Silveira</a>", "<br>",
+          "updated in: ", commit_date, "<br>",
+          "version: [", commit_sha, "]" ))
       )
     )
   )
@@ -432,7 +434,7 @@ server <- function(input, output, session) {
         )
     }
     
-    # first version 
+    #first version
     # if ("Occurrence" %in% input$layers && nrow(reactiveData()$filtered_occ) > 0) {
     #   leafletProxy("map", data = reactiveData()$filtered_occ) %>%
     #     addCircles(
@@ -448,16 +450,50 @@ server <- function(input, output, session) {
     #           )
     #     )
     #       labelOptions = labelOptions(noHide = FALSE, direction = "right")
-    #     
+    # 
     # }
     
     #### teste 2
+    # if ("Occurrence" %in% input$layers && nrow(reactiveData()$filtered_occ) > 0) {
+    #   leafletProxy("map", data = reactiveData()$filtered_occ) %>%
+    #     addCircles(
+    #       fillColor = "red",
+    #       fillOpacity = 0.5,
+    #       color = "red",
+    #       weight = 8,
+    #       popup = ~{
+    #         popupContent <- paste0(
+    #           "<strong>Locality: </strong> ", localidade, "<br>",
+    #           "<strong>Date found: </strong> ", data, "<br>"
+    #         )
+    # 
+    #         if (grepl("\\.(jpg|jpeg)$", jpg_1, ignore.case = TRUE) && !is.na(jpg_1)) {
+    #           popupContent <- lapply(jpg_1, function(jpg) {
+    #             paste0(
+    #               popupContent,
+    #               "<div><a href='img/pts_invasao/", jpg, "' target='_blank'><img style='display: block; margin-left: auto; margin-right: auto;' src='img/pts_invasao/", jpg, "' width='100';></a></div><br>"
+    #             )
+    #           })
+    #         }
+    # 
+    #         if (grepl("\\.(jpg|jpeg)$", jpg_2, ignore.case = TRUE) && !is.na(jpg_2)) {
+    #           popupContent <- lapply(jpg_2, function(jpg) {
+    #             paste0(
+    #               popupContent,
+    #               "<div><a href='img/pts_invasao/", jpg, "' target='_blank'><img style='display: block; margin-left: auto; margin-right: auto;' src='img/pts_invasao/", jpg, "' width='100';></a></div><br>"
+    #             )
+    #           })
+    #         }
+    # 
+    #         return(popupContent)
+    #       },
+    #       labelOptions = labelOptions(noHide = FALSE, direction = "right")
+    #     )
+    # }
+    # 
     
     
-    
-    
-    
-    #### code works but past palce holder
+### code works but paste place holder
 
     if ("Occurrence" %in% input$layers && nrow(reactiveData()$filtered_occ) > 0) {
       leafletProxy("map", data = reactiveData()$filtered_occ) %>%
@@ -471,27 +507,25 @@ server <- function(input, output, session) {
               "<strong>Locality: </strong> ", localidade, "<br>",
               "<strong>Date found: </strong> ", data, "<br>"
             )
-
-            # Check if any element in jpg_1 contains ".jpg" and, if so, add it to the popup
-            if (any(sapply(jpg_1, function(x) grepl(".jpg", ignore.case = TRUE, x)))) {
+            
+            # Check if any element in jpg_1 contains ".jpg" or ".jpeg" and, if so, add it to the popup
+            if (any(sapply(jpg_1, function(x) grepl("\\.(jpg|jpeg)$", x, ignore.case = TRUE)))) {
               popupContent <- paste0(popupContent,
-                                     "<div><a href='img/pts_invasao/", jpg_1, "' target='_blank'><img style='display: block; margin-left: auto; margin-right: auto;' src='img/pts_invasao/", jpg_1, "' width='100'></a></div>"
-                                     ,
-                                     "<br>"
+                                     "<div><a href='img/pts_invasao/", jpg_1, "' target='_blank'><img style='display: block; margin-left: auto; margin-right: auto;' src='img/pts_invasao/", jpg_1, "' width='100'></a></div><br>"
               )
             }
-
-            # Check if any element in jpg_2 contains ".jpg" and, if so, add it to the popup
-            if (any(sapply(jpg_2, function(x) grepl(".jpg", ignore.case = TRUE, x)))) {
+            
+            # Check if any element in jpg_2 contains ".jpg" or ".jpeg" and, if so, add it to the popup
+            if (any(sapply(jpg_2, function(x) grepl("\\.(jpg|jpeg)$", x, ignore.case = TRUE)))) {
               popupContent <- paste0(popupContent,
-                                     "<div><a href='img/pts_invasao/", jpg_2, "' target='_blank'><img style='display: block; margin-left: auto; margin-right: auto;' src='img/pts_invasao/", jpg_2, "' width='100';></a></div>"
+                                     "<div><a href='img/pts_invasao/", jpg_2, "' target='_blank'><img style='display: block; margin-left: auto; margin-right: auto;' src='img/pts_invasao/", jpg_2, "' width='100'></a></div><br>"
               )
             }
-
+            
             return(popupContent)
           },
           labelOptions = labelOptions(noHide = FALSE, direction = "right")
-        )
+            )
     }
     
     
