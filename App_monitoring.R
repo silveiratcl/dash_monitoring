@@ -516,11 +516,11 @@ server <- function(input, output, session) {
             }
             
             # Check if any element in jpg_2 contains ".jpg" or ".jpeg" and, if so, add it to the popup
-            if (any(sapply(jpg_2, function(x) grepl("\\.(jpg|jpeg)$", x, ignore.case = TRUE)))) {
-              popupContent <- paste0(popupContent,
-                                     "<div><a href='img/pts_invasao/", jpg_2, "' target='_blank'><img style='display: block; margin-left: auto; margin-right: auto;' src='img/pts_invasao/", jpg_2, "' width='100'></a></div><br>"
-              )
-            }
+            #if (any(sapply(jpg_2, function(x) grepl("\\.(jpg|jpeg)$", x, ignore.case = TRUE)))) {
+             # popupContent <- paste0(popupContent,
+              #                       "<div><a href='img/pts_invasao/", jpg_2, "' target='_blank'><img style='display: block; margin-left: auto; margin-right: auto;' src='img/pts_invasao/", jpg_2, "' width='100'></a></div><br>"
+              #)
+            #}
             
             return(popupContent)
           },
