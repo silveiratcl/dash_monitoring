@@ -12,9 +12,6 @@ library(mapview)
 library(lubridate)
 library(git2r)
 
-#updateDate <- format(file.info("App_monitoring.R")$mtime, "%d-%m-%Y")
-
-
 # Import shapefiles data
 
 dafor_shp <- st_read("shp/dafor.shp")
@@ -32,6 +29,22 @@ occ_shp <- st_read("shp/manchas_cs.shp")
 manejo_shp <- st_read("shp/manejo_cs.shp")
 
 invasion_pts_shp <- st_read("shp/pts_invasao_nova.shp")
+
+####
+
+#locality inspection
+#dafor <-sort(unique(dafor_shp$localidade))
+#local <-sort(unique(local_shp$localidade))
+#setdiff(dafor, local)
+
+
+#dafor <-sort(unique(dafor_mrg_local_shp$localidade))
+#local <-sort(unique(local_shp$localidade))
+#setdiff(dafor, local)
+
+####
+
+
 
 # Repository version
 
