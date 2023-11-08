@@ -32,31 +32,31 @@ invasion_pts_shp <- st_read("shp/pts_invasao_nova.shp")
 
 ####
 
-#locality inspection
-dafor <-sort(unique(dafor_shp$localidade))
-local <-sort(unique(local_shp$localidade))
-setdiff(dafor, local)
-
-
-dafor <-sort(unique(dafor_mrg_local_shp$localidade))
-local <-sort(unique(local_shp$localidade))
-setdiff(dafor, local)
-
-
-dafor_mrg_local_shp_teste <- dafor_shp %>%
-  data.frame() %>%
-  merge(., local_shp, by = "localidade", all.x = TRUE) %>%
-  filter(!st_is_empty(geometry.y)) %>% #Temporary - need create localities to all monitored site
-  group_by(localidade, data) %>% 
-  mutate(n_tr_pr_sum = sum(n_tr_pr)) %>% 
-  select(-c(geometry.x), localidade, n_tr_pr_sum ) %>% 
-  st_as_sf(sf_column_name = "geometry.y")
-
-
-
-dafor_mrg_local_shp_teste %>% filter( localidade == "engenho" )
-# Calculate the sum of "n_tr_pr_sum" for filtered_dafor_mrg_local
-total_sum <- sum(filtered_dafor_mrg_loca_teste$n_tr_pr_sum)
+# #locality inspection
+# dafor <-sort(unique(dafor_shp$localidade))
+# local <-sort(unique(local_shp$localidade))
+# setdiff(dafor, local)
+# 
+# 
+# dafor <-sort(unique(dafor_mrg_local_shp$localidade))
+# local <-sort(unique(local_shp$localidade))
+# setdiff(dafor, local)
+# 
+# 
+# dafor_mrg_local_shp_teste <- dafor_shp %>%
+#   data.frame() %>%
+#   merge(., local_shp, by = "localidade", all.x = TRUE) %>%
+#   filter(!st_is_empty(geometry.y)) %>% #Temporary - need create localities to all monitored site
+#   group_by(localidade, data) %>% 
+#   mutate(n_tr_pr_sum = sum(n_tr_pr)) %>% 
+#   select(-c(geometry.x), localidade, n_tr_pr_sum ) %>% 
+#   st_as_sf(sf_column_name = "geometry.y")
+# 
+# 
+# 
+# dafor_mrg_local_shp_teste %>% filter( localidade == "engenho" )
+# # Calculate the sum of "n_tr_pr_sum" for filtered_dafor_mrg_local
+# total_sum <- sum(filtered_dafor_mrg_loca_teste$n_tr_pr_sum)
 
 ####
 
@@ -117,59 +117,59 @@ ntrans_mrg_local_shp <- dafor_shp %>%
 
 today<-Sys.Date()
 
-  ### Calculate the maximum date for each locality in manejo_shp
-  max_dates <- manejo_shp %>%
-    group_by(localidade) %>%
-    summarize(max_data = max(data))
-  
-  ### Merge manejo_shp with local_shp based on the "localidade" field
-  merged_data <- manejo_shp %>%
-    data.frame() %>%
-    merge(., local_shp, by = "localidade", all.x = TRUE) %>%
-    filter(!st_is_empty(geometry.y)) %>%
-    select(localidade, data, n_colonias, geometry.x, geometry.y)  ### add more variables
-  
-  ### Join merged_data with max_dates to get the maximum date for each locality
-  result_data <- merged_data %>%
-    left_join(max_dates, by = "localidade") %>%
-    mutate(days_since_last_record = as.numeric(today - max_data))
-  
-  # Filter only records where the date matches the maximum date for each locality
-  # result_data <- result_data %>%
-  # filter(data == max_data)
-  
-  ### Convert the result_data to an sf object
-  days_after_mng_mrg_local <- st_as_sf(result_data, sf_column_name = "geometry.y")
+### Calculate the maximum date for each locality in manejo_shp
+max_dates <- manejo_shp %>%
+  group_by(localidade) %>%
+  summarize(max_data = max(data))
+
+### Merge manejo_shp with local_shp based on the "localidade" field
+merged_data <- manejo_shp %>%
+  data.frame() %>%
+  merge(., local_shp, by = "localidade", all.x = TRUE) %>%
+  filter(!st_is_empty(geometry.y)) %>%
+  select(localidade, data, n_colonias, geometry.x, geometry.y)  ### add more variables
+
+### Join merged_data with max_dates to get the maximum date for each locality
+result_data <- merged_data %>%
+  left_join(max_dates, by = "localidade") %>%
+  mutate(days_since_last_record = as.numeric(today - max_data))
+
+# Filter only records where the date matches the maximum date for each locality
+# result_data <- result_data %>%
+# filter(data == max_data)
+
+### Convert the result_data to an sf object
+days_after_mng_mrg_local <- st_as_sf(result_data, sf_column_name = "geometry.y")
 
 ## Days since last check
 
-  ### Calculate the maximum date for each locality in dafor_shp
-  max_dates <- dafor_shp %>%
-    group_by(localidade) %>%
-    summarize(max_data = max(data))
-  
-  ### Merge manejo_shp with local_shp based on the "localidade" field
-  merged_data <- dafor_shp %>%
-    data.frame() %>%
-    merge(., local_shp, by = "localidade", all.x = TRUE) %>%
-    filter(!st_is_empty(geometry.y)) %>%
-    select(localidade, data, geometry.x, geometry.y)  ### add more variables
-  
-  ### Join merged_data with max_dates to get the maximum date for each locality
-  result_data <- merged_data %>%
-    left_join(max_dates, by = "localidade") %>%
-    mutate(days_since_last_check = as.numeric(today - max_data))
-  
-  # Filter only records where the date matches the maximum date for each locality
-  # result_data <- result_data %>%
-  # filter(data == max_data)
-  
-  ### Convert the result_data to an sf object
-  days_since_check_mrg_local <- st_as_sf(result_data, sf_column_name = "geometry.y")
-  
+### Calculate the maximum date for each locality in dafor_shp
+max_dates <- dafor_shp %>%
+  group_by(localidade) %>%
+  summarize(max_data = max(data))
 
-  
- 
+### Merge manejo_shp with local_shp based on the "localidade" field
+merged_data <- dafor_shp %>%
+  data.frame() %>%
+  merge(., local_shp, by = "localidade", all.x = TRUE) %>%
+  filter(!st_is_empty(geometry.y)) %>%
+  select(localidade, data, geometry.x, geometry.y)  ### add more variables
+
+### Join merged_data with max_dates to get the maximum date for each locality
+result_data <- merged_data %>%
+  left_join(max_dates, by = "localidade") %>%
+  mutate(days_since_last_check = as.numeric(today - max_data))
+
+# Filter only records where the date matches the maximum date for each locality
+# result_data <- result_data %>%
+# filter(data == max_data)
+
+### Convert the result_data to an sf object
+days_since_check_mrg_local <- st_as_sf(result_data, sf_column_name = "geometry.y")
+
+
+
+
 # Sidebar Menu
 
 sidebar <- dashboardSidebar(
@@ -280,7 +280,10 @@ server <- function(input, output, session) {
     
     filtered_occ <- invasion_pts_shp[invasion_pts_shp$data >= input$daterange[1] & invasion_pts_shp$data <= input$daterange[2], ]
     
-    filtered_dafor_mrg_local <- dafor_mrg_local_shp[dafor_mrg_local_shp$data >= input$daterange[1] & dafor_mrg_local_shp$data <= input$daterange[2], ]
+    filtered_dafor_mrg_local <- dafor_mrg_local_shp[dafor_mrg_local_shp$data >= input$daterange[1] & dafor_mrg_local_shp$data <= input$daterange[2], ]%>%
+      group_by(localidade) %>% 
+      mutate(n_tr_pr_sum = sum(n_tr_pr)) 
+      
     
     filtered_geo_mrg_local <- geo_mrg_local_shp[geo_mrg_local_shp$data >= input$daterange[1] & geo_mrg_local_shp$data <= input$daterange[2], ]
     
@@ -289,9 +292,9 @@ server <- function(input, output, session) {
     filtered_ntrans_mrg_local <- ntrans_mrg_local_shp[ntrans_mrg_local_shp$data >= input$daterange[1] & ntrans_mrg_local_shp$data <= input$daterange[2], ]
     
     filtered_days_after_mng_mrg_local <- days_after_mng_mrg_local[days_after_mng_mrg_local$data >= input$daterange[1] & days_after_mng_mrg_local$data <= input$daterange[2], ]
-   
+    
     filtered_days_since_check_mrg_local <- days_since_check_mrg_local[days_since_check_mrg_local$data >= input$daterange[1] & days_since_check_mrg_local$data <= input$daterange[2], ]
-
+    
     filtered_pacs <- pacs_shp
     
     filtered_local <- local_shp
@@ -387,7 +390,7 @@ server <- function(input, output, session) {
     leaflet() %>%
       addProviderTiles("Esri.WorldImagery") %>% 
       setView(-48.38, -27.28, zoom = 12) 
-      
+    
   })
   
   observe({
@@ -522,8 +525,8 @@ server <- function(input, output, session) {
     # 
     
     
-### code works but paste place holder
-
+    ### code works but paste place holder
+    
     if ("Occurrence" %in% input$layers && nrow(reactiveData()$filtered_occ) > 0) {
       leafletProxy("map", data = reactiveData()$filtered_occ) %>%
         addCircles(
@@ -546,20 +549,20 @@ server <- function(input, output, session) {
             
             # Check if any element in jpg_2 contains ".jpg" or ".jpeg" and, if so, add it to the popup
             #if (any(sapply(jpg_2, function(x) grepl("\\.(jpg|jpeg)$", x, ignore.case = TRUE)))) {
-             # popupContent <- paste0(popupContent,
-              #                       "<div><a href='img/pts_invasao/", jpg_2, "' target='_blank'><img style='display: block; margin-left: auto; margin-right: auto;' src='img/pts_invasao/", jpg_2, "' width='100'></a></div><br>"
-              #)
+            # popupContent <- paste0(popupContent,
+            #                       "<div><a href='img/pts_invasao/", jpg_2, "' target='_blank'><img style='display: block; margin-left: auto; margin-right: auto;' src='img/pts_invasao/", jpg_2, "' width='100'></a></div><br>"
+            #)
             #}
             
             return(popupContent)
           },
           labelOptions = labelOptions(noHide = FALSE, direction = "right")
-            )
+        )
     }
     
     
     
-       
+    
     if ("REBIO Limits" %in% input$layers && nrow(reactiveData()$filtered_rebio) > 0) {
       leafletProxy("map", data = reactiveData()$filtered_rebio) %>%
         addPolylines(
