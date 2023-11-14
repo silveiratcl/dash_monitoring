@@ -33,30 +33,15 @@ invasion_pts_shp <- st_read("shp/pts_invasao_nova.shp")
 ####
 
 # #locality inspection
-# dafor <-sort(unique(dafor_shp$localidade))
-# local <-sort(unique(local_shp$localidade))
-# setdiff(dafor, local)
+#dafor <-sort(unique(dafor_shp$localidade))
+#local <-sort(unique(local_shp$localidade))
+#setdiff(dafor, local)
 # 
 # 
-# dafor <-sort(unique(dafor_mrg_local_shp$localidade))
-# local <-sort(unique(local_shp$localidade))
-# setdiff(dafor, local)
-# 
-# 
-# dafor_mrg_local_shp_teste <- dafor_shp %>%
-#   data.frame() %>%
-#   merge(., local_shp, by = "localidade", all.x = TRUE) %>%
-#   filter(!st_is_empty(geometry.y)) %>% #Temporary - need create localities to all monitored site
-#   group_by(localidade, data) %>% 
-#   mutate(n_tr_pr_sum = sum(n_tr_pr)) %>% 
-#   select(-c(geometry.x), localidade, n_tr_pr_sum ) %>% 
-#   st_as_sf(sf_column_name = "geometry.y")
-# 
-# 
-# 
-# dafor_mrg_local_shp_teste %>% filter( localidade == "engenho" )
-# # Calculate the sum of "n_tr_pr_sum" for filtered_dafor_mrg_local
-# total_sum <- sum(filtered_dafor_mrg_loca_teste$n_tr_pr_sum)
+#dafor <-sort(unique(dafor_mrg_local_shp$localidade))
+#local <-sort(unique(local_shp$localidade))
+#setdiff(dafor, local)
+#
 
 ####
 
@@ -113,6 +98,10 @@ ntrans_mrg_local_shp <- dafor_shp %>%
   select(-c(geometry.x)) %>% 
   st_as_sf(sf_column_name = "geometry.y")
 
+
+ntrans_mrg_local_shp[ ntrans_mrg_local_shp$localidade == "saco_do_batismo", ]
+
+
 ## Days since last management
 
 today<-Sys.Date()
@@ -166,7 +155,6 @@ result_data <- merged_data %>%
 
 ### Convert the result_data to an sf object
 days_since_check_mrg_local <- st_as_sf(result_data, sf_column_name = "geometry.y")
-
 
 
 
@@ -274,6 +262,7 @@ server <- function(input, output, session) {
   # Define reactive data
   reactiveData <- reactive({
     # Filter shapefiles data based on selected date range
+    
     filtered_dafor <- dafor_shp[dafor_shp$data >= input$daterange[1] & dafor_shp$data <= input$daterange[2], ]
     
     filtered_geo <- geo_shp[geo_shp$data >= input$daterange[1] & geo_shp$data <= input$daterange[2], ]
@@ -282,18 +271,27 @@ server <- function(input, output, session) {
     
     filtered_dafor_mrg_local <- dafor_mrg_local_shp[dafor_mrg_local_shp$data >= input$daterange[1] & dafor_mrg_local_shp$data <= input$daterange[2], ]%>%
       group_by(localidade) %>% 
-      mutate(n_tr_pr_sum = sum(n_tr_pr)) 
+      mutate(n_tr_pr_sum = sum(n_tr_pr)) ######################################### solution to sum all n_tr_pr JESUS apply to all
       
     
     filtered_geo_mrg_local <- geo_mrg_local_shp[geo_mrg_local_shp$data >= input$daterange[1] & geo_mrg_local_shp$data <= input$daterange[2], ]
     
-    filtered_effort_mrg_local <- effort_mrg_local_shp[effort_mrg_local_shp$data >= input$daterange[1] & effort_mrg_local_shp$data <= input$daterange[2], ]
     
-    filtered_ntrans_mrg_local <- ntrans_mrg_local_shp[ntrans_mrg_local_shp$data >= input$daterange[1] & ntrans_mrg_local_shp$data <= input$daterange[2], ]
+    filtered_effort_mrg_local <- effort_mrg_local_shp[effort_mrg_local_shp$data >= input$daterange[1] & effort_mrg_local_shp$data <= input$daterange[2], ] %>% 
+      group_by(localidade) %>% 
+      mutate(n_tr_pr_1000 = round(sum(n_tr_pr)/(sum(comp_m)/1000),3))
+    
+    
+    filtered_ntrans_mrg_local <- ntrans_mrg_local_shp[ntrans_mrg_local_shp$data >= input$daterange[1] & ntrans_mrg_local_shp$data <= input$daterange[2], ] %>% 
+      group_by(localidade) %>% 
+      mutate(n_trans = sum(max(n_trans)))
+    
     
     filtered_days_after_mng_mrg_local <- days_after_mng_mrg_local[days_after_mng_mrg_local$data >= input$daterange[1] & days_after_mng_mrg_local$data <= input$daterange[2], ]
     
+    
     filtered_days_since_check_mrg_local <- days_since_check_mrg_local[days_since_check_mrg_local$data >= input$daterange[1] & days_since_check_mrg_local$data <= input$daterange[2], ]
+    
     
     filtered_pacs <- pacs_shp
     
@@ -614,7 +612,8 @@ server <- function(input, output, session) {
           fillColor = ~pal_iah(iah_seg_avg),
           color = ~pal_iah(iah_seg_avg),
           weight = 10,
-          popup = ~paste0("<strong>HSI: </strong> ", iah_seg_avg) ,
+          popup = ~paste0("<strong>Locality: </strong> ", localidade, "<br>",
+                          "<strong>HSI: </strong> ", iah_seg_avg) ,
           labelOptions = labelOptions(noHide = FALSE, direction = "right")
         )%>%
         addLegend(
@@ -639,7 +638,8 @@ server <- function(input, output, session) {
           fillColor = ~pal_effort(n_tr_pr_1000),
           color = ~pal_effort(n_tr_pr_1000),
           weight = 10,
-          popup = ~paste0("<strong>TWSC/1000: </strong> ", n_tr_pr_1000) ,
+          popup = ~paste0("<strong>Locality: </strong> ", localidade, "<br>",
+                          "<strong>TWSC/1000: </strong> ", n_tr_pr_1000) ,
           labelOptions = labelOptions(noHide = FALSE, direction = "right")
         )%>%
         addLegend(
@@ -664,7 +664,8 @@ server <- function(input, output, session) {
           fillColor = ~pal_ntrans(n_trans),
           color = ~pal_ntrans(n_trans),
           weight = 10,
-          popup = ~paste0("<strong>N. of Transects: </strong> ", n_trans) ,
+          popup = ~paste0("<strong>Locality: </strong> ", localidade, "<br>",
+                          "<strong>N. of Transects: </strong> ", n_trans) ,
           labelOptions = labelOptions(noHide = FALSE, direction = "right")
         )%>%
         addLegend(
