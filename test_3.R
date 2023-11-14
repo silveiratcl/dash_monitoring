@@ -169,7 +169,7 @@ sidebar <- dashboardSidebar(
       "<br>"
     )),
     
-    menuItem("Monitoring Map", tabname = "map", icon = icon("map"),
+    menuItem("Indicators", tabname = "map", icon = icon("map"),
              dateRangeInput(
                "daterange", "Select date range: ",
                format = "yyyy-mm-dd",
@@ -187,11 +187,15 @@ sidebar <- dashboardSidebar(
                            "Days since last management(DSLManag)",
                            "Days since last check(DSLCheck)"),
                selected = c("Transects with Sun Coral(TWSC)")
-             ),
+             )),
+             
+  
+    menuItem("Layers", tabname = "map", icon = icon("map"),
+            
              
              checkboxGroupInput(
                "layers",
-               label = "Data:",
+               label = "Layers:",
                choices = c("Occurrence", 
                            "Dafor", "Geomorphology", 
                            "Target Locations", 
@@ -200,6 +204,9 @@ sidebar <- dashboardSidebar(
                selected = c("Occurrence")
              )),
     
+    
+    
+      
     menuItem("Documentation", 
              tabName = "documentation", 
              icon = icon("file-text"),
