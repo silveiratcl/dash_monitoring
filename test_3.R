@@ -169,7 +169,7 @@ sidebar <- dashboardSidebar(
       "<br>"
     )),
     
-    menuItem("Indicators", tabname = "map", icon = icon("map"),
+    menuItem("Indicators", tabname = "map", icon = icon("triangle-exclamation"),
              dateRangeInput(
                "daterange", "Select date range: ",
                format = "yyyy-mm-dd",
@@ -278,7 +278,7 @@ server <- function(input, output, session) {
     
     filtered_dafor_mrg_local <- dafor_mrg_local_shp[dafor_mrg_local_shp$data >= input$daterange[1] & dafor_mrg_local_shp$data <= input$daterange[2], ]%>%
       group_by(localidade) %>% 
-      mutate(n_tr_pr_sum = sum(n_tr_pr)) ######################################### solution to sum all n_tr_pr JESUS apply to all
+      mutate(n_tr_pr_sum = sum(n_tr_pr)) #fix
       
     
     filtered_geo_mrg_local <- geo_mrg_local_shp[geo_mrg_local_shp$data >= input$daterange[1] & geo_mrg_local_shp$data <= input$daterange[2], ]
@@ -683,13 +683,39 @@ server <- function(input, output, session) {
         )
     }
     
+    # if ("Days since last management(DSLManag)" %in% input$indicators && nrow(reactiveData()$filtered_days_after_mng_mrg_local) > 0) {
+    #   
+    #   pal_last_mng <- colorNumeric(
+    #     palette = rev(c("#BE2A3E","#CD4242","#E76B49","#F7B059","#F5CA63","#EACF65","#D6CA64","#5DA25F","#449559","#22763F")),
+    #     domain = reactiveData()$filtered_days_after_mng_mrg_local$days_since_last_record
+    #   )
+    #   
+    #   leafletProxy("map", data = reactiveData()$filtered_days_after_mng_mrg_local) %>%
+    #     addPolylines(
+    #       fillColor = ~pal_last_mng(days_since_last_record),
+    #       color = ~pal_last_mng(days_since_last_record),
+    #       weight = 10,
+    #       popup = ~paste0("<strong>Localidade:  <strong>", localidade, "<br>",
+    #                       "<strong>Days since last management:  </strong> ", days_since_last_record, "<br>",
+    #                       "<strong>Date of last management:  </strong> ", max_data),
+    #       labelOptions = labelOptions(noHide = FALSE, direction = "right")
+    #     )%>%
+    #     addLegend(
+    #       pal = pal_last_mng,
+    #       values = reactiveData()$filtered_days_after_mng_mrg_loca$days_since_last_record,
+    #       position = "bottomright",
+    #       title = ~paste0("DSLManag")
+    #     )
+    # }
+    
     if ("Days since last management(DSLManag)" %in% input$indicators && nrow(reactiveData()$filtered_days_after_mng_mrg_local) > 0) {
-      
+
       pal_last_mng <- colorNumeric(
         palette = rev(c("#BE2A3E","#CD4242","#E76B49","#F7B059","#F5CA63","#EACF65","#D6CA64","#5DA25F","#449559","#22763F")),
-        domain = reactiveData()$filtered_days_after_mng_mrg_local$days_since_last_record
+        domain = pmax(0 ,  pmin(reactiveData()$filtered_days_after_mng_mrg_local$days_since_last_record, 365)),
+        na.color = "#BE2A3E"
       )
-      
+
       leafletProxy("map", data = reactiveData()$filtered_days_after_mng_mrg_local) %>%
         addPolylines(
           fillColor = ~pal_last_mng(days_since_last_record),
@@ -702,11 +728,17 @@ server <- function(input, output, session) {
         )%>%
         addLegend(
           pal = pal_last_mng,
-          values = reactiveData()$filtered_days_after_mng_mrg_loca$days_since_last_record,
+          values =  pmax(0 ,  pmin(reactiveData()$filtered_days_after_mng_mrg_local$days_since_last_record, 365)),
           position = "bottomright",
-          title = ~paste0("DSLManag")
+          title = ~paste0("DSLManag"),
+          bins = 5,
+          labFormat = labelFormat(prefix = c("","","","","",">"))
+          
         )
     }
+
+    
+    
     
     if ("Days since last check(DSLCheck)" %in% input$indicators && nrow(reactiveData()$ filtered_days_since_check_mrg_local) > 0) {
       
