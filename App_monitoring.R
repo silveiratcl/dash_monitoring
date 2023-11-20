@@ -32,31 +32,16 @@ invasion_pts_shp <- st_read("shp/pts_invasao_nova.shp")
 
 ####
 
-#locality inspection
-dafor <-sort(unique(dafor_shp$localidade))
-local <-sort(unique(local_shp$localidade))
-setdiff(dafor, local)
-
-
-dafor <-sort(unique(dafor_mrg_local_shp$localidade))
-local <-sort(unique(local_shp$localidade))
-setdiff(dafor, local)
-
-
-dafor_mrg_local_shp_teste <- dafor_shp %>%
-  data.frame() %>%
-  merge(., local_shp, by = "localidade", all.x = TRUE) %>%
-  filter(!st_is_empty(geometry.y)) %>% #Temporary - need create localities to all monitored site
-  group_by(localidade, data) %>% 
-  mutate(n_tr_pr_sum = sum(n_tr_pr)) %>% 
-  select(-c(geometry.x), localidade, n_tr_pr_sum ) %>% 
-  st_as_sf(sf_column_name = "geometry.y")
-
-
-
-dafor_mrg_local_shp_teste %>% filter( localidade == "engenho" )
-# Calculate the sum of "n_tr_pr_sum" for filtered_dafor_mrg_local
-total_sum <- sum(filtered_dafor_mrg_loca_teste$n_tr_pr_sum)
+# #locality inspection
+#dafor <-sort(unique(dafor_shp$localidade))
+#local <-sort(unique(local_shp$localidade))
+#setdiff(dafor, local)
+# 
+# 
+#dafor <-sort(unique(dafor_mrg_local_shp$localidade))
+#local <-sort(unique(local_shp$localidade))
+#setdiff(dafor, local)
+#
 
 ####
 
@@ -113,63 +98,66 @@ ntrans_mrg_local_shp <- dafor_shp %>%
   select(-c(geometry.x)) %>% 
   st_as_sf(sf_column_name = "geometry.y")
 
+
+ntrans_mrg_local_shp[ ntrans_mrg_local_shp$localidade == "saco_do_batismo", ]
+
+
 ## Days since last management
 
 today<-Sys.Date()
 
-  ### Calculate the maximum date for each locality in manejo_shp
-  max_dates <- manejo_shp %>%
-    group_by(localidade) %>%
-    summarize(max_data = max(data))
-  
-  ### Merge manejo_shp with local_shp based on the "localidade" field
-  merged_data <- manejo_shp %>%
-    data.frame() %>%
-    merge(., local_shp, by = "localidade", all.x = TRUE) %>%
-    filter(!st_is_empty(geometry.y)) %>%
-    select(localidade, data, n_colonias, geometry.x, geometry.y)  ### add more variables
-  
-  ### Join merged_data with max_dates to get the maximum date for each locality
-  result_data <- merged_data %>%
-    left_join(max_dates, by = "localidade") %>%
-    mutate(days_since_last_record = as.numeric(today - max_data))
-  
-  # Filter only records where the date matches the maximum date for each locality
-  # result_data <- result_data %>%
-  # filter(data == max_data)
-  
-  ### Convert the result_data to an sf object
-  days_after_mng_mrg_local <- st_as_sf(result_data, sf_column_name = "geometry.y")
+### Calculate the maximum date for each locality in manejo_shp
+max_dates <- manejo_shp %>%
+  group_by(localidade) %>%
+  summarize(max_data = max(data))
+
+### Merge manejo_shp with local_shp based on the "localidade" field
+merged_data <- manejo_shp %>%
+  data.frame() %>%
+  merge(., local_shp, by = "localidade", all.x = TRUE) %>%
+  filter(!st_is_empty(geometry.y)) %>%
+  select(localidade, data, n_colonias, geometry.x, geometry.y)  ### add more variables
+
+### Join merged_data with max_dates to get the maximum date for each locality
+result_data <- merged_data %>%
+  left_join(max_dates, by = "localidade") %>%
+  mutate(days_since_last_record = as.numeric(today - max_data))
+
+# Filter only records where the date matches the maximum date for each locality
+# result_data <- result_data %>%
+# filter(data == max_data)
+
+### Convert the result_data to an sf object
+days_after_mng_mrg_local <- st_as_sf(result_data, sf_column_name = "geometry.y")
 
 ## Days since last check
 
-  ### Calculate the maximum date for each locality in dafor_shp
-  max_dates <- dafor_shp %>%
-    group_by(localidade) %>%
-    summarize(max_data = max(data))
-  
-  ### Merge manejo_shp with local_shp based on the "localidade" field
-  merged_data <- dafor_shp %>%
-    data.frame() %>%
-    merge(., local_shp, by = "localidade", all.x = TRUE) %>%
-    filter(!st_is_empty(geometry.y)) %>%
-    select(localidade, data, geometry.x, geometry.y)  ### add more variables
-  
-  ### Join merged_data with max_dates to get the maximum date for each locality
-  result_data <- merged_data %>%
-    left_join(max_dates, by = "localidade") %>%
-    mutate(days_since_last_check = as.numeric(today - max_data))
-  
-  # Filter only records where the date matches the maximum date for each locality
-  # result_data <- result_data %>%
-  # filter(data == max_data)
-  
-  ### Convert the result_data to an sf object
-  days_since_check_mrg_local <- st_as_sf(result_data, sf_column_name = "geometry.y")
-  
+### Calculate the maximum date for each locality in dafor_shp
+max_dates <- dafor_shp %>%
+  group_by(localidade) %>%
+  summarize(max_data = max(data))
 
-  
- 
+### Merge manejo_shp with local_shp based on the "localidade" field
+merged_data <- dafor_shp %>%
+  data.frame() %>%
+  merge(., local_shp, by = "localidade", all.x = TRUE) %>%
+  filter(!st_is_empty(geometry.y)) %>%
+  select(localidade, data, geometry.x, geometry.y)  ### add more variables
+
+### Join merged_data with max_dates to get the maximum date for each locality
+result_data <- merged_data %>%
+  left_join(max_dates, by = "localidade") %>%
+  mutate(days_since_last_check = as.numeric(today - max_data))
+
+# Filter only records where the date matches the maximum date for each locality
+# result_data <- result_data %>%
+# filter(data == max_data)
+
+### Convert the result_data to an sf object
+days_since_check_mrg_local <- st_as_sf(result_data, sf_column_name = "geometry.y")
+
+
+
 # Sidebar Menu
 
 sidebar <- dashboardSidebar(
@@ -181,7 +169,7 @@ sidebar <- dashboardSidebar(
       "<br>"
     )),
     
-    menuItem("Monitoring Map", tabname = "map", icon = icon("map"),
+    menuItem("Indicators", tabname = "map", icon = icon("triangle-exclamation"),
              dateRangeInput(
                "daterange", "Select date range: ",
                format = "yyyy-mm-dd",
@@ -199,11 +187,15 @@ sidebar <- dashboardSidebar(
                            "Days since last management(DSLManag)",
                            "Days since last check(DSLCheck)"),
                selected = c("Transects with Sun Coral(TWSC)")
-             ),
+             )),
+    
+    
+    menuItem("Layers", tabname = "map", icon = icon("map"),
+             
              
              checkboxGroupInput(
                "layers",
-               label = "Data:",
+               label = "Layers:",
                choices = c("Occurrence", 
                            "Dafor", "Geomorphology", 
                            "Target Locations", 
@@ -211,6 +203,9 @@ sidebar <- dashboardSidebar(
                            "REBIO Limits" ),
                selected = c("Occurrence")
              )),
+    
+    
+    
     
     menuItem("Documentation", 
              tabName = "documentation", 
@@ -274,24 +269,37 @@ server <- function(input, output, session) {
   # Define reactive data
   reactiveData <- reactive({
     # Filter shapefiles data based on selected date range
+    
     filtered_dafor <- dafor_shp[dafor_shp$data >= input$daterange[1] & dafor_shp$data <= input$daterange[2], ]
     
     filtered_geo <- geo_shp[geo_shp$data >= input$daterange[1] & geo_shp$data <= input$daterange[2], ]
     
     filtered_occ <- invasion_pts_shp[invasion_pts_shp$data >= input$daterange[1] & invasion_pts_shp$data <= input$daterange[2], ]
     
-    filtered_dafor_mrg_local <- dafor_mrg_local_shp[dafor_mrg_local_shp$data >= input$daterange[1] & dafor_mrg_local_shp$data <= input$daterange[2], ]
+    filtered_dafor_mrg_local <- dafor_mrg_local_shp[dafor_mrg_local_shp$data >= input$daterange[1] & dafor_mrg_local_shp$data <= input$daterange[2], ]%>%
+      group_by(localidade) %>% 
+      mutate(n_tr_pr_sum = sum(n_tr_pr)) #fix
+    
     
     filtered_geo_mrg_local <- geo_mrg_local_shp[geo_mrg_local_shp$data >= input$daterange[1] & geo_mrg_local_shp$data <= input$daterange[2], ]
     
-    filtered_effort_mrg_local <- effort_mrg_local_shp[effort_mrg_local_shp$data >= input$daterange[1] & effort_mrg_local_shp$data <= input$daterange[2], ]
     
-    filtered_ntrans_mrg_local <- ntrans_mrg_local_shp[ntrans_mrg_local_shp$data >= input$daterange[1] & ntrans_mrg_local_shp$data <= input$daterange[2], ]
+    filtered_effort_mrg_local <- effort_mrg_local_shp[effort_mrg_local_shp$data >= input$daterange[1] & effort_mrg_local_shp$data <= input$daterange[2], ] %>% 
+      group_by(localidade) %>% 
+      mutate(n_tr_pr_1000 = round(sum(n_tr_pr)/(sum(comp_m)/1000),3))
+    
+    
+    filtered_ntrans_mrg_local <- ntrans_mrg_local_shp[ntrans_mrg_local_shp$data >= input$daterange[1] & ntrans_mrg_local_shp$data <= input$daterange[2], ] %>% 
+      group_by(localidade) %>% 
+      mutate(n_trans = sum(max(n_trans)))
+    
     
     filtered_days_after_mng_mrg_local <- days_after_mng_mrg_local[days_after_mng_mrg_local$data >= input$daterange[1] & days_after_mng_mrg_local$data <= input$daterange[2], ]
-   
+    
+    
     filtered_days_since_check_mrg_local <- days_since_check_mrg_local[days_since_check_mrg_local$data >= input$daterange[1] & days_since_check_mrg_local$data <= input$daterange[2], ]
-
+    
+    
     filtered_pacs <- pacs_shp
     
     filtered_local <- local_shp
@@ -387,7 +395,7 @@ server <- function(input, output, session) {
     leaflet() %>%
       addProviderTiles("Esri.WorldImagery") %>% 
       setView(-48.38, -27.28, zoom = 12) 
-      
+    
   })
   
   observe({
@@ -522,8 +530,8 @@ server <- function(input, output, session) {
     # 
     
     
-### code works but paste place holder
-
+    ### code works but paste place holder
+    
     if ("Occurrence" %in% input$layers && nrow(reactiveData()$filtered_occ) > 0) {
       leafletProxy("map", data = reactiveData()$filtered_occ) %>%
         addCircles(
@@ -546,20 +554,20 @@ server <- function(input, output, session) {
             
             # Check if any element in jpg_2 contains ".jpg" or ".jpeg" and, if so, add it to the popup
             #if (any(sapply(jpg_2, function(x) grepl("\\.(jpg|jpeg)$", x, ignore.case = TRUE)))) {
-             # popupContent <- paste0(popupContent,
-              #                       "<div><a href='img/pts_invasao/", jpg_2, "' target='_blank'><img style='display: block; margin-left: auto; margin-right: auto;' src='img/pts_invasao/", jpg_2, "' width='100'></a></div><br>"
-              #)
+            # popupContent <- paste0(popupContent,
+            #                       "<div><a href='img/pts_invasao/", jpg_2, "' target='_blank'><img style='display: block; margin-left: auto; margin-right: auto;' src='img/pts_invasao/", jpg_2, "' width='100'></a></div><br>"
+            #)
             #}
             
             return(popupContent)
           },
           labelOptions = labelOptions(noHide = FALSE, direction = "right")
-            )
+        )
     }
     
     
     
-       
+    
     if ("REBIO Limits" %in% input$layers && nrow(reactiveData()$filtered_rebio) > 0) {
       leafletProxy("map", data = reactiveData()$filtered_rebio) %>%
         addPolylines(
@@ -611,7 +619,8 @@ server <- function(input, output, session) {
           fillColor = ~pal_iah(iah_seg_avg),
           color = ~pal_iah(iah_seg_avg),
           weight = 10,
-          popup = ~paste0("<strong>HSI: </strong> ", iah_seg_avg) ,
+          popup = ~paste0("<strong>Locality: </strong> ", localidade, "<br>",
+                          "<strong>HSI: </strong> ", iah_seg_avg) ,
           labelOptions = labelOptions(noHide = FALSE, direction = "right")
         )%>%
         addLegend(
@@ -636,7 +645,8 @@ server <- function(input, output, session) {
           fillColor = ~pal_effort(n_tr_pr_1000),
           color = ~pal_effort(n_tr_pr_1000),
           weight = 10,
-          popup = ~paste0("<strong>TWSC/1000: </strong> ", n_tr_pr_1000) ,
+          popup = ~paste0("<strong>Locality: </strong> ", localidade, "<br>",
+                          "<strong>TWSC/1000: </strong> ", n_tr_pr_1000) ,
           labelOptions = labelOptions(noHide = FALSE, direction = "right")
         )%>%
         addLegend(
@@ -661,7 +671,8 @@ server <- function(input, output, session) {
           fillColor = ~pal_ntrans(n_trans),
           color = ~pal_ntrans(n_trans),
           weight = 10,
-          popup = ~paste0("<strong>N. of Transects: </strong> ", n_trans) ,
+          popup = ~paste0("<strong>Locality: </strong> ", localidade, "<br>",
+                          "<strong>N. of Transects: </strong> ", n_trans) ,
           labelOptions = labelOptions(noHide = FALSE, direction = "right")
         )%>%
         addLegend(
@@ -672,11 +683,37 @@ server <- function(input, output, session) {
         )
     }
     
+    # if ("Days since last management(DSLManag)" %in% input$indicators && nrow(reactiveData()$filtered_days_after_mng_mrg_local) > 0) {
+    #   
+    #   pal_last_mng <- colorNumeric(
+    #     palette = rev(c("#BE2A3E","#CD4242","#E76B49","#F7B059","#F5CA63","#EACF65","#D6CA64","#5DA25F","#449559","#22763F")),
+    #     domain = reactiveData()$filtered_days_after_mng_mrg_local$days_since_last_record
+    #   )
+    #   
+    #   leafletProxy("map", data = reactiveData()$filtered_days_after_mng_mrg_local) %>%
+    #     addPolylines(
+    #       fillColor = ~pal_last_mng(days_since_last_record),
+    #       color = ~pal_last_mng(days_since_last_record),
+    #       weight = 10,
+    #       popup = ~paste0("<strong>Localidade:  <strong>", localidade, "<br>",
+    #                       "<strong>Days since last management:  </strong> ", days_since_last_record, "<br>",
+    #                       "<strong>Date of last management:  </strong> ", max_data),
+    #       labelOptions = labelOptions(noHide = FALSE, direction = "right")
+    #     )%>%
+    #     addLegend(
+    #       pal = pal_last_mng,
+    #       values = reactiveData()$filtered_days_after_mng_mrg_loca$days_since_last_record,
+    #       position = "bottomright",
+    #       title = ~paste0("DSLManag")
+    #     )
+    # }
+    
     if ("Days since last management(DSLManag)" %in% input$indicators && nrow(reactiveData()$filtered_days_after_mng_mrg_local) > 0) {
       
       pal_last_mng <- colorNumeric(
         palette = rev(c("#BE2A3E","#CD4242","#E76B49","#F7B059","#F5CA63","#EACF65","#D6CA64","#5DA25F","#449559","#22763F")),
-        domain = reactiveData()$filtered_days_after_mng_mrg_local$days_since_last_record
+        domain = pmax(0,  pmin(reactiveData()$filtered_days_after_mng_mrg_local$days_since_last_record, 365)),
+        na.color = "#BE2A3E"
       )
       
       leafletProxy("map", data = reactiveData()$filtered_days_after_mng_mrg_local) %>%
@@ -691,17 +728,24 @@ server <- function(input, output, session) {
         )%>%
         addLegend(
           pal = pal_last_mng,
-          values = reactiveData()$filtered_days_after_mng_mrg_loca$days_since_last_record,
+          values =  pmax(0 ,  pmin(reactiveData()$filtered_days_after_mng_mrg_local$days_since_last_record, 365)),
           position = "bottomright",
-          title = ~paste0("DSLManag")
+          title = ~paste0("DSLManag"),
+          bins = 5,
+          labFormat = labelFormat(prefix = c("","","","","",">"))
+          
         )
     }
+    
+    
+    
     
     if ("Days since last check(DSLCheck)" %in% input$indicators && nrow(reactiveData()$ filtered_days_since_check_mrg_local) > 0) {
       
       pal_last_check <- colorNumeric(
         palette = rev(c("#BE2A3E","#CD4242","#E76B49","#F7B059","#F5CA63","#EACF65","#D6CA64","#5DA25F","#449559","#22763F")),
-        domain = reactiveData()$ filtered_days_since_check_mrg_local$days_since_last_check
+        domain = pmax(0, pmin(reactiveData()$ filtered_days_since_check_mrg_local$days_since_last_check, 365)),
+        na.color = "#BE2A3E"
       )
       
       leafletProxy("map", data = reactiveData()$ filtered_days_since_check_mrg_local) %>%
@@ -716,9 +760,11 @@ server <- function(input, output, session) {
         )%>%
         addLegend(
           pal = pal_last_check,
-          values = reactiveData()$filtered_days_since_check_mrg_local$days_since_last_check,
+          values = pmax(0,  pmin(reactiveData()$filtered_days_after_mng_mrg_local$days_since_last_record, 365)),
           position = "bottomright",
-          title = ~paste0("DSLCheck")
+          title = ~paste0("DSLCheck"), 
+          bins = 5,
+          labFormat = labelFormat(prefix = c("","","","","",">"))
         )
     }
     
