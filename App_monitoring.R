@@ -2,7 +2,6 @@ library(shiny)
 library(shinydashboard)
 library(htmlwidgets)
 library(leaflet)
-#library(rgdal)
 library(sp)
 library(sf)
 library(dplyr)
@@ -211,7 +210,7 @@ sidebar <- dashboardSidebar(
              tabName = "documentation", 
              icon = icon("file-text"),
              menuSubItem(text = "About the Dashboard", 
-                         href = "https://dent-packet-5b9.notion.site/PACS-Monitoring-Dashboard-09d8969b1ff14e3ab8bd1f73de6a0906?pvs=4",
+                         href = "about_dash/about_dash.html",
                          newtab = T)),
     
     
@@ -221,8 +220,8 @@ sidebar <- dashboardSidebar(
         style = "font-size: 12px; text-align: left; margin-left: 15px ",
         HTML(paste0(
           "Developed by ", "<a href='https://silveiratcl.github.io/site/' target = '_blank'>Thiago Silveira</a>", "<br>",
-          "updated in: ", commit_date, "<br>",
-          "version: [", commit_sha, "]" ))
+          "last update: ", commit_date, "<br>",
+          "commit: [", commit_sha, "]" ))
       )
     )
   )
