@@ -730,8 +730,8 @@ server <- function(input, output, session) {
           values =  pmax(0 ,  pmin(reactiveData()$filtered_days_after_mng_mrg_local$days_since_last_record, 365)),
           position = "bottomright",
           title = ~paste0("DSLManag"),
-          bins = 5,
-          labFormat = labelFormat(prefix = c("","","","","",">"))
+          bins = c(50, 100, 150, 200, 250, 300, 350),
+          labFormat = labelFormat(prefix = c("","","","","","",">"))
           
         )
     }
@@ -762,8 +762,8 @@ server <- function(input, output, session) {
           values = pmax(0,  pmin(reactiveData()$filtered_days_after_mng_mrg_local$days_since_last_record, 365)),
           position = "bottomright",
           title = ~paste0("DSLCheck"), 
-          bins = 5,
-          labFormat = labelFormat(prefix = c("","","","","",">"))
+          bins = c(50, 100, 150, 200, 250, 300, 350),
+          labFormat = labelFormat(prefix = c("","","","","","",">"))
         )
     }
     
