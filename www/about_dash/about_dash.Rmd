@@ -1,11 +1,17 @@
 ---
-title: "ABOUT THE DASHBOARD"
-output: html_document
-date: "2023-11-23"
+title: "Dashboard Documentation"
+author: "Thiago Silveira"
+date: "`r Sys.Date()`"
+output:
+  prettydoc::html_pretty:
+    theme: cayman
+    highlight: github
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+```{css my-header-colors, echo = FALSE}
+.page-header {
+    background-image: linear-gradient(120deg, red, orange);
+}
 ```
 
 # PACS Monitoring Dashboard
