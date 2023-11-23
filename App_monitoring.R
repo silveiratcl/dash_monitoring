@@ -23,7 +23,7 @@ local_shp <- st_read("shp/localidade.shp")
 
 rebio_shp <- st_read("shp/limite_rebio.shp")
 
-occ_shp <- st_read("shp/manchas_cs.shp")
+occ_shp <- st_read("shp/manchas_cs.shp") #### take off
 
 manejo_shp <- st_read("shp/manejo_cs.shp")
 

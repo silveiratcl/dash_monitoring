@@ -1,6 +1,6 @@
 ---
-title: "Dashboard Documentation"
-author: "Thiago Silveira"
+title: "Dashboard Documentation <br> PACS REBIO Arvoredo"
+author: "Thiago C. L. Silveira <br> [https://silveiratcl.github.io/site/](https://silveiratcl.github.io/site/)"
 date: "`r Sys.Date()`"
 output:
   prettydoc::html_pretty:
@@ -8,21 +8,33 @@ output:
     highlight: github
 ---
 
-```{css my-header-colors, echo = FALSE}
+```{css my-colors, echo = FALSE}
 .page-header {
     background-image: linear-gradient(120deg, red, orange);
 }
+
+.main-content h1, 
+.main-content h2, 
+.main-content h3, 
+.main-content h4, 
+.main-content h5, 
+.main-content h6  {
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+    font-weight: 400;
+    color: #000000;
+}
+
+
+
 ```
 
-# PACS Monitoring Dashboard
 
-Thiago Cesar L. Silveira 
+# Overview
 
-[https://silveiratcl.github.io/site/](https://silveiratcl.github.io/site/)
+A dashboard is an incredibly valuable tool that empowers users to effortlessly visualize and make sense of complex data. By acting as a centralized hub, it presents a wealth of essential metrics, trends, and insights in a visually captivating format. This makes it an ideal solution for environmental agencies seeking to acquire valuable resources for the Early Detection - Quick Response (EDQR) of invasive species. In this documentation, we will explore the pivotal components of data interpretation in the Sun Coral Monitoring Dashboard - PACS REBIO Arvoredo. The dashboard was developed using QGIS to digitize de database and the R to develop the dashboard.  
 
-## Overview
-
-A dashboard is an incredibly valuable tool that empowers users to effortlessly visualize and make sense of complex data. By acting as a centralized hub, it presents a wealth of essential metrics, trends, and insights in a visually captivating format. This makes it an ideal solution for environmental agencies seeking to acquire valuable resources for the Early Detection - Quick Response (EDQR) of invasive species. In this documentation, we will explore the pivotal components of data interpretation in the Sun Coral Monitoring Dashboard - PACS REBIO Arvoredo.
+<br>
 
 # Monitoring Protocol
 
@@ -32,6 +44,8 @@ The monitoring data is obtained in localities, in the locality is defined a segm
 
 ![Spatial reference](fig/about_local.png)
 
+<br>
+
 ### Active search
 
 - Snorkelling - Floatation
@@ -39,7 +53,9 @@ In the depth range of zero to 2 meters of the sampling segment, monitoring will 
 - Autonomous Diving
 The active search technique for sun coral colonies will be employed in each sampling segment. Autonomous diving samples will be conducted by two pairs of divers. The operational area for each pair will be determined by depth ranges (e.g., from 0 to 8m and from 9 to 15m) along the rocky shore, aiming to cover the greatest vertical extension possible. The division of scanning depths between the pairs may vary depending on the bathymetric characteristics of each sampling segment.
 
-![Monitoring depth](fig/about_depth_check.png)
+![Monitoring](fig/about_depth_check.png)
+
+<br>
 
 ### DAFOR
 
@@ -53,6 +69,8 @@ To classify the invasion levels in the sampled segments, we utilize a semi-quant
 - **Absent**: In this class, no records of sun coral occurrences are found.
 
 During the assessment process, divers move along transects delimited by 1 minute of sampling. Observations made on the DAFOR scale are then converted to a relative abundance index (RAI) using the following classification: 10 - dominant, 8 - abundant, 6 - frequent, 4 - occasional, 2 - rare; zero - absent.
+
+<br>
 
 ### Rocky Shore Geomorphology
 
@@ -81,7 +99,9 @@ $$
 HSI=(CrCr+BC+SMR+(-1*(FS-10))+(-1*(CC-10)))/5
 $$
 
-# Map
+<br>
+
+# Data displayed on Map
 
 ### **Indicators**
 
@@ -101,23 +121,17 @@ $$
 - **Locality**: Limits and nomenclature of the localities within REBIO Arvoredo.
 - **REBIO Limits**: Limits of the REBIO Arvoredo Conservation Unit.
 
-# Infoboxes
+# ***Infoboxes***
 
-### ***Monitored location***
+- ***Monitored location***: Number of localities monitored at REBIO and surroundings.
 
-Number of localities monitored at REBIO and surroundings.
+- ***Number of segments***: The segment is a line representing where the divers did the monitoring protocol, this box shows the count.
 
-### ***Number of segments***
+- ***Transects with sun coral***: Transect is part of segment obtained in one minute of active search. Here is showed the count of segments positive for sun coral occurrence.
 
-The segment is a line representing where the divers did the monitoring protocol, this box shows the count.
+- ***Dive Time***: Sun of dive time by all pair of divers in the monitoring data.
 
-### ***Transects with sun coral***
-
-Transect is part of segment obtained in one minute of active search. Here is showed the count of segments positive for sun coral occurrence.
-
-### ***Dive Time***
-
-Sun of dive time by all pair of divers in the monitoring data.
+<br>
 
 # ***References and useful links***
 
