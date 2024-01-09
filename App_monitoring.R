@@ -710,8 +710,8 @@ server <- function(input, output, session) {
     if ("Days since last management(DSLManag)" %in% input$indicators && nrow(reactiveData()$filtered_days_after_mng_mrg_local) > 0) {
       
       pal_last_mng <- colorNumeric(
-        palette = rev(c("#BE2A3E","#CD4242","#E76B49","#F7B059","#F5CA63","#EACF65","#D6CA64","#5DA25F","#449559","#22763F")),
-        domain = pmax(0,  pmin(reactiveData()$filtered_days_after_mng_mrg_local$days_since_last_record, 365)),
+        palette = rev(c("#BE2A3E", "#CD4242", "#E76B49", "#F7B059", "#F5CA63", "#EACF65", "#D6CA64", "#5DA25F", "#449559", "#22763F")),
+        domain = pmax(0, pmin(reactiveData()$filtered_days_after_mng_mrg_local$days_since_last_record, 365)),
         na.color = "#BE2A3E"
       )
       
@@ -724,18 +724,16 @@ server <- function(input, output, session) {
                           "<strong>Days since last management:  </strong> ", days_since_last_record, "<br>",
                           "<strong>Date of last management:  </strong> ", max_data),
           labelOptions = labelOptions(noHide = FALSE, direction = "right")
-        )%>%
+        ) %>%
         addLegend(
           pal = pal_last_mng,
-          values =  pmax(0 ,  pmin(reactiveData()$filtered_days_after_mng_mrg_local$days_since_last_record, 365)),
+          values = pmax(0, pmin(reactiveData()$filtered_days_after_mng_mrg_local$days_since_last_record, 365)),
           position = "bottomright",
           title = ~paste0("DSLManag"),
-          bins = c(50, 100, 150, 200, 250, 300, 350),
-          labFormat = labelFormat(prefix = c("","","","","","",">"))
-          
+          bins = c(0, 50, 100, 150, 200, 250, 300, 350)#,
+          #labFormat = labelFormat(prefix = c("","","","","","","",">"))
         )
     }
-    
     
     
     
@@ -762,8 +760,8 @@ server <- function(input, output, session) {
           values = pmax(0,  pmin(reactiveData()$filtered_days_after_mng_mrg_local$days_since_last_record, 365)),
           position = "bottomright",
           title = ~paste0("DSLCheck"), 
-          bins = c(50, 100, 150, 200, 250, 300, 350),
-          labFormat = labelFormat(prefix = c("","","","","","",">"))
+          bins = c(0, 50, 100, 150, 200, 250, 300, 350)#,
+          #labFormat = labelFormat(prefix = c("","","","","","",">"))
         )
     }
     
