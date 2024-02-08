@@ -14,3 +14,6 @@ commit_date <- system2("git", c("log", "-1", "--format=%ci", "HEAD"), stdout = T
   substr(1, 10)
 
 
+commit_sha =  "d744714d"
+
+commit_date = "2024-01-09"
