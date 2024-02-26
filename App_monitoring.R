@@ -360,14 +360,14 @@ server <- function(input, output, session) {
   
   output$locations_Box <- renderInfoBox({
     infoBox(
-      "Monitored Locations", paste0(reactiveData()$n_location), icon = icon("location-dot"),
+      "Locations Monitored ", paste0(reactiveData()$n_location), icon = icon("location-dot"),
       color = "green"
     )
   })
   
   output$segments_Box <- renderInfoBox({
     infoBox(
-      "Segments monitored ", paste0(reactiveData()$n_segments), icon = icon("bacon"),
+      "Monitored Segments ", paste0(reactiveData()$n_segments), icon = icon("bacon"),
       color = "orange"
     )
   })
