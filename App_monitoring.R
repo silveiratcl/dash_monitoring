@@ -367,7 +367,7 @@ server <- function(input, output, session) {
   
   output$segments_Box <- renderInfoBox({
     infoBox(
-      "Monitored Segments ", paste0(reactiveData()$n_segments), icon = icon("bacon"),
+      "Segments Monitored ", paste0(reactiveData()$n_segments), icon = icon("bacon"),
       color = "orange"
     )
   })
