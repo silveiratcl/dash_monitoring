@@ -220,8 +220,8 @@ sidebar <- dashboardSidebar(
         style = "font-size: 12px; text-align: left; margin-left: 15px ",
         HTML(paste0(
           "Developed by ", "<a href='https://silveiratcl.github.io/site/' target = '_blank'>Thiago Silveira</a>", "<br>",
-          "last update: ", commit_date, "<br>",
-          "commit: [", commit_sha, "]" ))
+          "last update: ", "2024-02-26", "<br>",
+          "commit: [", "8b4b7142", "]" ))
       )
     )
   )
