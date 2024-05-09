@@ -197,7 +197,7 @@ sidebar <- dashboardSidebar(
                label = "Indicators:",
                choices = c("Transects with Sun Coral(TWSC)", 
                            "Habitat Suitability Index(HSI)",
-                           "TWSC/1000m",
+                          # "TWSC/1000m",
                            "N. of Transects by Locality(NTL)",
                            "Days since last management(DSLManag)",
                            "Days since last check(DSLCheck)"),
