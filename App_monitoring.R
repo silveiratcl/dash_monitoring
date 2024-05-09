@@ -42,6 +42,22 @@ invasion_pts_shp <- st_read("shp/pts_invasao_nova.shp")
 #setdiff(dafor, local)
 #
 
+
+## check comp_m
+
+#print(dafor_shp, n=123)
+#print(geo_shp, n=73)
+#print(local_shp, n=42)
+
+#dafor_shp %>% 
+ # filter(comp_m == NA)
+
+#dafor_shp$comp_m
+
+#local_shp$comp_m
+
+
+
 ####
 
 
@@ -77,14 +93,14 @@ geo_mrg_local_shp <- geo_shp %>%
 
 ## Monitoring Effort transects - positives by 1000 meters 
 
-effort_mrg_local_shp <- dafor_shp %>% 
-  data.frame() %>% 
-  merge(., local_shp, by = "localidade", all.x = TRUE) %>%
-  filter(!st_is_empty(geometry.y)) %>% #Temporary - need create localities to all monitored site
-  group_by(localidade, data) %>% 
-  mutate(n_tr_pr_1000 = round(sum(n_tr_pr)/(sum(comp_m)/1000),3)) %>% 
-  select(-c(geometry.x)) %>% 
-  st_as_sf(sf_column_name = "geometry.y")
+#effort_mrg_local_shp <- dafor_shp %>% 
+ # data.frame() %>% 
+  #merge(., local_shp, by = "localidade", all.x = TRUE) %>%
+  #filter(!st_is_empty(geometry.y)) %>% #Temporary - need create localities to all monitored site
+  #group_by(localidade, data) %>% 
+  #mutate(n_tr_pr_1000 = round(sum(n_tr_pr)/(sum(comp_m)/1000),3)) %>% 
+  #select(-c(geometry.x)) %>% 
+  #st_as_sf(sf_column_name = "geometry.y")
 
 ## Number of transects by locality
 
@@ -283,9 +299,9 @@ server <- function(input, output, session) {
     filtered_geo_mrg_local <- geo_mrg_local_shp[geo_mrg_local_shp$data >= input$daterange[1] & geo_mrg_local_shp$data <= input$daterange[2], ]
     
     
-    filtered_effort_mrg_local <- effort_mrg_local_shp[effort_mrg_local_shp$data >= input$daterange[1] & effort_mrg_local_shp$data <= input$daterange[2], ] %>% 
-      group_by(localidade) %>% 
-      mutate(n_tr_pr_1000 = round(sum(n_tr_pr)/(sum(comp_m)/1000),3))
+    #filtered_effort_mrg_local <- effort_mrg_local_shp[effort_mrg_local_shp$data >= input$daterange[1] & effort_mrg_local_shp$data <= input$daterange[2], ] %>% 
+     # group_by(localidade) %>% 
+      #mutate(n_tr_pr_1000 = round(sum(n_tr_pr)/(sum(comp_m)/1000),3))
     
     
     filtered_ntrans_mrg_local <- ntrans_mrg_local_shp[ntrans_mrg_local_shp$data >= input$daterange[1] & ntrans_mrg_local_shp$data <= input$daterange[2], ] %>% 
@@ -342,7 +358,7 @@ server <- function(input, output, session) {
       filtered_occ = filtered_occ,
       filtered_dafor_mrg_local = filtered_dafor_mrg_local,
       filtered_geo_mrg_local = filtered_geo_mrg_local,
-      filtered_effort_mrg_local = filtered_effort_mrg_local,
+      #filtered_effort_mrg_local = filtered_effort_mrg_local,
       filtered_ntrans_mrg_local = filtered_ntrans_mrg_local,
       filtered_days_after_mng_mrg_local = filtered_days_after_mng_mrg_local,
       filtered_days_since_check_mrg_local = filtered_days_since_check_mrg_local,
@@ -631,30 +647,31 @@ server <- function(input, output, session) {
     }
     
     
-    if ("TWSC/1000m" %in% input$indicators && nrow(reactiveData()$filtered_effort_mrg_local) > 0) {
+    #if ("TWSC/1000m" %in% input$indicators && nrow(reactiveData()$filtered_effort_mrg_local) > 0) {
       
-      pal_effort <- colorNumeric(
-        palette = "Oranges",
-        domain = reactiveData()$filtered_effort_mrg_local$n_tr_pr_1000
-      )
+     # pal_effort <- colorNumeric(
+      #  palette = "Oranges",
+      #  domain = reactiveData()$filtered_effort_mrg_local$n_tr_pr_1000
+      #)
       
       
-      leafletProxy("map", data = reactiveData()$filtered_effort_mrg_local) %>%
-        addPolylines(
-          fillColor = ~pal_effort(n_tr_pr_1000),
-          color = ~pal_effort(n_tr_pr_1000),
-          weight = 10,
-          popup = ~paste0("<strong>Locality: </strong> ", localidade, "<br>",
-                          "<strong>TWSC/1000: </strong> ", n_tr_pr_1000) ,
-          labelOptions = labelOptions(noHide = FALSE, direction = "right")
-        )%>%
-        addLegend(
-          pal = pal_effort,
-          values = reactiveData()$filtered_effort_mrg_local$n_tr_pr_1000,
-          position = "bottomright",
-          title = ~paste0("TWSC/1000m")
-        )
-    }
+      #leafletProxy("map", data = reactiveData()$filtered_effort_mrg_local) %>%
+       # addPolylines(
+        #  fillColor = ~pal_effort(n_tr_pr_1000),
+         # color = ~pal_effort(n_tr_pr_1000),
+        #  weight = 10,
+          #popup = ~paste0("<strong>Locality: </strong> ", localidade, "<br>",
+        #                  "<strong>TWSC/1000: </strong> ", n_tr_pr_1000) ,
+         # labelOptions = labelOptions(noHide = FALSE, direction = "right")
+        #)%>%
+      #  addLegend(
+       #   pal = pal_effort,
+        #  values = reactiveData()$filtered_effort_mrg_local$n_tr_pr_1000,
+         # position = "bottomright",
+          #title = ~paste0("TWSC/1000m")
+        #)
+   
+    # }
     
     
     if ("N. of Transects by Locality(NTL)" %in% input$indicators && nrow(reactiveData()$filtered_ntrans_mrg_local) > 0) {
