@@ -197,7 +197,9 @@ sidebar <- dashboardSidebar(
                label = "Indicators:",
                choices = c("Transects with Sun Coral(TWSC)", 
                            "Habitat Suitability Index(HSI)",
+
                           # "TWSC/1000m",
+
                            "N. of Transects by Locality(NTL)",
                            "Days since last management(DSLManag)",
                            "Days since last check(DSLCheck)"),
@@ -651,7 +653,9 @@ server <- function(input, output, session) {
       
      # pal_effort <- colorNumeric(
       #  palette = "Oranges",
+
       #  domain = reactiveData()$filtered_effort_mrg_local$n_tr_pr_1000
+
       #)
       
       
@@ -659,19 +663,20 @@ server <- function(input, output, session) {
        # addPolylines(
         #  fillColor = ~pal_effort(n_tr_pr_1000),
          # color = ~pal_effort(n_tr_pr_1000),
-        #  weight = 10,
+
+          #weight = 10,
           #popup = ~paste0("<strong>Locality: </strong> ", localidade, "<br>",
-        #                  "<strong>TWSC/1000: </strong> ", n_tr_pr_1000) ,
-         # labelOptions = labelOptions(noHide = FALSE, direction = "right")
+           #               "<strong>TWSC/1000: </strong> ", n_tr_pr_1000) ,
+          #labelOptions = labelOptions(noHide = FALSE, direction = "right")
         #)%>%
-      #  addLegend(
-       #   pal = pal_effort,
-        #  values = reactiveData()$filtered_effort_mrg_local$n_tr_pr_1000,
-         # position = "bottomright",
+        #addLegend(
+         # pal = pal_effort,
+          #values = reactiveData()$filtered_effort_mrg_local$n_tr_pr_1000,
+          #position = "bottomright",
           #title = ~paste0("TWSC/1000m")
         #)
-   
-    # }
+    #}
+
     
     
     if ("N. of Transects by Locality(NTL)" %in% input$indicators && nrow(reactiveData()$filtered_ntrans_mrg_local) > 0) {
