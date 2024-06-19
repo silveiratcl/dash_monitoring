@@ -559,7 +559,11 @@ server <- function(input, output, session) {
           popup = ~{
             popupContent <- paste0(
               "<strong>Locality: </strong> ", localidade, "<br>",
-              "<strong>Date found: </strong> ", data, "<br>"
+              "<strong>Date found: </strong> ", data, "<br>",
+              "<strong>Depth: </strong> " , prof_m, "<br>",
+              "<strong>Accessibility: </strong> " , acesso, "<br>"
+              
+              
             )
             
             # Check if any element in jpg_1 contains ".jpg" or ".jpeg" and, if so, add it to the popup
@@ -568,6 +572,8 @@ server <- function(input, output, session) {
                                      "<div><a href='img/pts_invasao/", jpg_1, "' target='_blank'><img style='display: block; margin-left: auto; margin-right: auto;' src='img/pts_invasao/", jpg_1, "' width='100'></a></div><br>"
               )
             }
+            
+            
             
             # Check if any element in jpg_2 contains ".jpg" or ".jpeg" and, if so, add it to the popup
             #if (any(sapply(jpg_2, function(x) grepl("\\.(jpg|jpeg)$", x, ignore.case = TRUE)))) {
