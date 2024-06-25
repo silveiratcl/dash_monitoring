@@ -551,20 +551,23 @@ server <- function(input, output, session) {
     
     if ("Occurrence" %in% input$layers && nrow(reactiveData()$filtered_occ) > 0) {
       leafletProxy("map", data = reactiveData()$filtered_occ) %>%
-        addCircles(
-          fillColor = "red",
-          fillOpacity = 0.5,
-          color = "red",
-          weight = 8,
+        #addCircles(
+        addMarkers(
+          #clusterOptions = markerClusterOptions(),
+         # fillColor = "red",
+          #fillOpacity = 0.5,
+          #color = "red",
+          #weight = 8,
           popup = ~{
             popupContent <- paste0(
               "<strong>Locality: </strong> ", localidade, "<br>",
               "<strong>Date found: </strong> ", data, "<br>",
               "<strong>Depth: </strong> " , prof_m, "<br>",
-              "<strong>Accessibility: </strong> " , acesso, "<br>"
-              
-              
-            )
+              "<strong>Accessibility: </strong> " , acesso, "<br>",
+              "<strong>Lng/Lat: </strong> " , geometry, "<br>"
+              )
+            
+          
             
             # Check if any element in jpg_1 contains ".jpg" or ".jpeg" and, if so, add it to the popup
             if (any(sapply(jpg_1, function(x) grepl("\\.(jpg|jpeg)$", x, ignore.case = TRUE)))) {
