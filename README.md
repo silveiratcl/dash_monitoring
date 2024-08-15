@@ -14,7 +14,7 @@ Spatial reference
 The monitoring data is obtained in localities, in the locality is defined a segment, and in the extension of a segment are obtained information linked to 1 minute transects recorded by the divers.
 
 
-[!](https://github.com/silveiratcl/dash_monitoring/blob/main/www/about_dash/fig/about_local.png)
+[](https://github.com/silveiratcl/dash_monitoring/blob/main/www/about_dash/fig/about_local.png)
 Spatial reference
 
 
