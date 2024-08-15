@@ -1,4 +1,4 @@
-# Dashbord of sun coral monitoring data
+# Dashbord of Sun Coral Monitoring Data
 Dashboard displaying sun coral monitoring data.
 [](https://thiagosilveira.shinyapps.io/dash_monitoring2/)
 
