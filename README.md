@@ -17,14 +17,11 @@ The monitoring data is obtained in localities, in the locality is defined a segm
 ![Spatial reference](https://github.com/silveiratcl/dash_monitoring/blob/main/www/about_dash/fig/about_local.png)
 
 
-
 ## Active search
 Snorkelling - Floatation In the depth range of zero to 2 meters of the sampling segment, monitoring will be carried out by a snorkelling diver. The diver will search within this depth range, covering the sampling segment and looking for possible occurrences of sun coral.
 Autonomous Diving The active search technique for sun coral colonies will be employed in each sampling segment. Autonomous diving samples will be conducted by two pairs of divers. The operational area for each pair will be determined by depth ranges (e.g., from 0 to 8m and from 9 to 15m) along the rocky shore, aiming to cover the greatest vertical extension possible. The division of scanning depths between the pairs may vary depending on the bathymetric characteristics of each sampling segment.
 
-
-Monitoring
-
+![Monitoring](https://github.com/silveiratcl/dash_monitoring/blob/main/www/about_dash/fig/about_depth_check.png)
 
 ## DAFOR
 To classify the invasion levels in the sampled segments, we utilize a semi-quantitative scale of abundance known as the DAFOR scale (Sutherland, 2006), specifically adapted for assessing the abundance of sun coral (Creed & Fleury, 2009). The scale assigns values to each relative abundance class, which are described as follows:
