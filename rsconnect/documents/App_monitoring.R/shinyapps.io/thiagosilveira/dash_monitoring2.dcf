@@ -5,9 +5,9 @@ account: thiagosilveira
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 11722073
-bundleId: 8754722
+bundleId: 8787345
 url: https://thiagosilveira.shinyapps.io/dash_monitoring2/
-when: 1718656231.52934
-lastSyncTime: 1718656231.52935
+when: 1719340882.99707
+lastSyncTime: 1719340882.99708
 asMultiple: FALSE
 asStatic: FALSE
